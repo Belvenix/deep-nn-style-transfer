@@ -21,6 +21,6 @@ class ContentLayer(nn.Module):
         # Compute the loss as Mean Squared Errors as in the original paper Gatys et. al. (2015)
         # and return the activations to ensure it is passed forward in the network
 
-        self.loss = F.mse_loss(generated_activations, target_activations)
+        self.loss = F.mse_loss(generated_activations, self.target_activations)
         
         return generated_activations
