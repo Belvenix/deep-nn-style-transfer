@@ -10,7 +10,13 @@ def gram_matrix(activations):
     :param activations: features from neural network layer
     :return: Normalized Gram matrix
     """
-    # Add code here
+    # Get the shape of activations
+
+    # Resize the activations to 2D matrix of size (n*c, h*w)
+
+    # Compute gram matrix
+ 
+    # Normalize the matrix
 
 
 class StyleLayer(nn.Module):
