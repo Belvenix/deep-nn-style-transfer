@@ -14,11 +14,13 @@ class ContentLayer(nn.Module):
         # Detach the target content from the computation graph to ensure
         # it stays constant and does not throw errors during computation
         # and define loss
-        
-        # Add code here
+        self.target_activations = target_activations.detach()
+        self.loss = 0
 
     def forward(self, generated_activations):
         # Compute the loss as Mean Squared Errors as in the original paper Gatys et. al. (2015)
         # and return the activations to ensure it is passed forward in the network
 
-        # Add code here
+        self.loss = F.mse_loss(generated_activations, target_activations)
+        
+        return generated_activations
