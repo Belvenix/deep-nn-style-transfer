@@ -1,6 +1,6 @@
-
 import torch.nn as nn
 import torch.nn.functional as F
+
 
 
 class ContentLayer(nn.Module):
@@ -14,6 +14,7 @@ class ContentLayer(nn.Module):
         # Detach the target content from the computation graph to ensure
         # it stays constant and does not throw errors during computation
         # and define loss
+        # Reference link: https://pytorch.org/docs/stable/autograd.html?highlight=detach#torch.Tensor.detach
         self.target_activations = target_activations.detach()
         self.loss = 0
 

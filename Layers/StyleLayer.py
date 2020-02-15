@@ -30,7 +30,14 @@ class StyleLayer(nn.Module):
         # Compute the gram matrix of target activations for style image
         # and define loss
         
+        # Detach the target content from the computation graph to ensure
+        # it stays constant and does not throw errors during computation
+        # and define loss
+        # Reference link: https://pytorch.org/docs/stable/autograd.html?highlight=detach#torch.Tensor.detach
+        
         # Add code here
+        self.target_activations = target_activations.detach()
+        self.loss = 0
 
     def forward(self, generated_activations):
         # Compute the gram matrix for generated activations,
@@ -38,3 +45,4 @@ class StyleLayer(nn.Module):
         # and pass the activations forward in neural network
         
         # Add code here
+        return generated_activations
