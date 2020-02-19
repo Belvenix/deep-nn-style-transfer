@@ -25,37 +25,41 @@ IMAGES_PATH = "images/"
 # -- UTILITY FUNCTIONS --
 
 
-def resize(...):
+def resize():
     """Resize the image to size specified in the beginning of code"""
     
     # Add code here
+    pass
 
-
-def image_loader(...):
+def image_loader():
     """Loads the images from disk as preprocessed tensors"""
        
     # Add code here
+    pass
 
 
-def to_image(...):
+def to_image():
     """Converts tensor to PIL image"""
     
     # Add code here
+    pass
 
 
-def show_tensor(...):
+def show_tensor():
     """
     Helper function to display the pytorch tensor as image.
     """
     
     # Add code here
+    pass
 
-def save_tensor(...):
+def save_tensor():
     """
     Helper function to save pytorch tensor as jpg image.
     """
     
     # Add code here
+    pass
 
 # Now to properly implement the style transfer we need to:
 # 1. Define the custom content layer that will allow us to compute content loss (ContentLayer.py)
@@ -79,22 +83,114 @@ def save_tensor(...):
 
 
 # 4. Rebuild the network
-def rebuild_model(...):
+def rebuild_model(nn_model, content_image, style_image,
+                  normalize_mean, normalize_std, 
+                  content_layers_req, style_layers_req):
                   
-    # Add code here
+    """ Creates new model that is a modified copy of input nn_model.
+    
+        Inserts StyleLayer and ContentLayer after layers specified in
+        content_layers_req and style_layers_req lists. 
+        
+        Check out those variables in the main function on the end of file
+        to see the naming structure of layers. 
+        
+        Returns modified model and lists of StyleLayers and ContentLayers
+        inserted into modified model"""
+    # Deepcopy the model
+    
+    model_copy = copy.deepcopy(nn_model)
+
+    # Create a new model that will be modified version of input model
+    # starts with normalization layer to ensure all images that are
+    # inserted are normalized like the ones original model was trained on
+    
+    # Check out torch.nn.Sequential and remember to make sure it resides on correct device
+    # Also ensure that input images are on the same device
+    
+    # --- Add code here ---
+    
+    
+    # We need to keep track of the losses in content/style layers
+    # to compute the total loss therefore we keep those in a list and return it
+    # at the end of the function
+    # This will let us access loss values in those layers
+    
+    # --- Add code here ---
+    
+    # Loop over the layers in original network
+    i = 0
+    for layer in model_copy.children():
+        # The layers in vgg are not numerated so we have to add numeration
+        # to copied layers so we can append our content and style layers to it
+        
+        # --- Add code here ---
+        
+        # Check which instance this layer is to name it appropiately
+        # In vgg we only use nn.Conv2d,  nn.ReLU, nn.MaxPool2d
+        # For naming conventions use "Conv2d_{}".format(i) and appropiately for other instances
+        
+        # --- Add code here ---
+        
+        # Layer has now numerated name so we can find it easily
+        # Add it to our model
+        
+         # --- Add code here ---
+         
+        # After adding check if it is a layer after which we should add our content
+        # or style layer
+        # Check for content layers
+        if name in content_layers_req:
+            # Get the activations for original content image in this layer
+            # and detach the from pytorch's graph
+           
+            # --- Add code here ---
+           
+            # Create the content layer
+            
+            # --- Add code here ---
+           
+            # Append it to the module with proper name
+            
+            # --- Add code here ---
+           
+        # Check for style layers
+        if name in style_layers_req:
+            # Get the activations for original style image in this layer
+            # and detach the from pytorch's graph
+           
+            # --- Add code here ---
+           
+            # Create the style layer
+            
+            # --- Add code here ---
+           
+            # Append it to the module with proper name
+            
+            # --- Add code here ---
+           
+    # Add this point our new model is the same as input model but with
+    # StyleLayers and ContentLayers inserted after required layers
+    # we don't need any layers after the last style or content layer
+    # so we need to delete them from the model
+    
+    # --- Add code here ---
+    
+    #return model and StyleLayer and ContentLayer lists
 
 
 # 5. Define the optimizer
-def get_optimizer(...):
+def get_optimizer():
     """Uses LBFGS as proposed by Gatys himself because it gives best results"""
       # Add code here
+      pass
 
 
 # 6. Write training function
-def style_transfer(...):
+def style_transfer():
     """Runs the style transfer on input image"""
       # Add code here
-
+       pass
 
 if __name__ == '__main__':
     # Pretty printer used for nice display of architecture
