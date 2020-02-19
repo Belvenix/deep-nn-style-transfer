@@ -1,7 +1,6 @@
-
+from torch import mm
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 
 
 def gram_matrix(activations):
@@ -11,12 +10,16 @@ def gram_matrix(activations):
     :return: Normalized Gram matrix
     """
     # Get the shape of activations
-
+    n,c,h,w = activations.size()
+	
     # Resize the activations to 2D matrix of size (n*c, h*w)
+    activations = activations.view(n*c, h*w)
+    # or activations = torch.reshape(activations,(n*c,h*w))
 
     # Compute gram matrix
- 
+    g_matrix = torch.mm(activations, activations.t())
     # Normalize the matrix
+    return g_matrix
 
 
 class StyleLayer(nn.Module):
@@ -30,7 +33,14 @@ class StyleLayer(nn.Module):
         # Compute the gram matrix of target activations for style image
         # and define loss
         
+        # Detach the target content from the computation graph to ensure
+        # it stays constant and does not throw errors during computation
+        # and define loss
+        # Reference link: https://pytorch.org/docs/stable/autograd.html?highlight=detach#torch.Tensor.detach
+        
         # Add code here
+        self.target_activations = target_activations.detach()
+        self.loss = 0
 
     def forward(self, generated_activations):
         # Compute the gram matrix for generated activations,
@@ -38,3 +48,4 @@ class StyleLayer(nn.Module):
         # and pass the activations forward in neural network
         
         # Add code here
+        return generated_activations
