@@ -14,13 +14,13 @@ class NormalizeLayer(nn.Module):
     """
     def __init__(self, mean, std):
         super(NormalizeLayer, self).__init__()
-        # Reshape the mean and std to [C, 1, 1] to work with pytorch tensors of shape [N, C, H, W]
-        self.normalize = transforms.Normalize(mean=mean, std=std)
+        # Reshape the mean and std to [C, 1, 1] to work with pytorch tensors of shape
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        self.mean = torch.tensor(mean).reshape(-1, 1, 1).to(device)
+        self.std = torch.tensor(std).reshape(-1, 1, 1).to(device)
 
     def forward(self, image):
         # Normalize the image
-        image = self.normalize(image)
-        # Add singleton dimension to create batch
-        image = image.unsqeeze(0)
-        return self.normalize(image)
+        norm_image = (image - self.mean) / self.std
+        return norm_image
 
