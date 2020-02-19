@@ -2,6 +2,7 @@
 # mean=[0.485, 0.456, 0.406] and std=[0.229, 0.224, 0.225]"
 
 import torch.nn as nn
+import torchvision.transforms as transforms
 import torch
 
 
@@ -14,11 +15,12 @@ class NormalizeLayer(nn.Module):
     def __init__(self, mean, std):
         super(NormalizeLayer, self).__init__()
         # Reshape the mean and std to [C, 1, 1] to work with pytorch tensors of shape [N, C, H, W]
-        
-        # Add code here
+        self.normalize = transforms.Normalize(mean=mean, std=std)
 
     def forward(self, image):
         # Normalize the image
-        
-        # Add code here
+        image = self.normalize(image)
+        # Add singleton dimension to create batch
+        image = image.unsqeeze(0)
+        return self.normalize(image)
 
