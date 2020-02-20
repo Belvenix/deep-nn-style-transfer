@@ -40,7 +40,7 @@ class StyleLayer(nn.Module):
         
         # Add code here
         self.target_activations = target_activations.detach()
-        self.target_gram = gram_matrix(target_activations)
+        self.target_gram = gram_matrix(self.target_activations)
         self.loss = 0
 
     def forward(self, generated_activations):
