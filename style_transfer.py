@@ -27,43 +27,31 @@ IMAGES_PATH = "images/"
 # -- UTILITY FUNCTIONS --
 
 
-def resize():
+def resize(pil_image):
     """Resize the image to size specified in the beginning of code"""
+    resized_image = pil_image.resize(imsize)
+    return resized_image
 
-    # Add code here
-    pass
-
-
-def image_loader():
+def image_loader(file_name):
     """Loads the images from disk as preprocessed tensors"""
+    image = Image.open(IMAGES_PATH + file_name)
+    resized_image = resize(image)
+    tensor = (transforms.ToTensor()(resized_image)).to(device)
+    return tensor
 
-    # Add code here
-    pass
-
-
-def to_image():
+def to_image(tensor):
     """Converts tensor to PIL image"""
+    image = transforms.ToPILImage()(tensor.cpu())
+    return image
 
-    # Add code here
-    pass
+def show_tensor(tensor):
+    """Helper function to display the pytorch tensor as image."""
+    to_image(tensor).show()
 
-
-def show_tensor():
-    """
-    Helper function to display the pytorch tensor as image.
-    """
-
-    # Add code here
-    pass
-
-
-def save_tensor():
-    """
-    Helper function to save pytorch tensor as jpg image.
-    """
-
-    # Add code here
-    pass
+def save_tensor(file_name, tensor):
+    """Helper function to save pytorch tensor as jpg image."""
+    image = to_image(tensor)
+    image.save(RESULTS_PATH + file_name, format='JPEG')
 
 
 # Now to properly implement the style transfer we need to:
