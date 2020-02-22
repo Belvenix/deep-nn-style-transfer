@@ -40,6 +40,7 @@ class StyleLayer(nn.Module):
         
         # Add code here
         self.target_activations = target_activations.detach()
+        self.target_gram = gram_matrix(self.target_activations)
         self.loss = 0
 
     def forward(self, generated_activations):
@@ -51,7 +52,7 @@ class StyleLayer(nn.Module):
         G = gram_matrix(generated_activations)
         
         #Compute the style loss
-        self.loss = F.mse_loss(G, self.target_activations)
+        self.loss = F.mse_loss(G, self.target_gram)
         
         #Pass activations forward in neural network
         return generated_activations
