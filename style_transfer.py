@@ -116,6 +116,7 @@ def rebuild_model(nn_model, content_image, style_image,
     style_layers_list = []
 
     # Loop over the layers in original network
+
     i = 0
     conv_i = 0
     last_significant_layer = 0
