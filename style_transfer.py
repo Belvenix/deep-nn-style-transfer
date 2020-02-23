@@ -105,7 +105,7 @@ def rebuild_model(nn_model, content_image, style_image,
     # Also ensure that input images are on the same device
 
     new_model = nn.Sequential().to(device)
-    new_model.add_module("Normalize_1", NormalizeLayer(normalize_mean, normalize_std))
+    new_model.add_module("Normalize_0", NormalizeLayer(normalize_mean, normalize_std))
 
     # We need to keep track of the losses in content/style layers
     # to compute the total loss therefore we keep those in a list and return it
@@ -116,12 +116,8 @@ def rebuild_model(nn_model, content_image, style_image,
     style_layers_list = []
 
     # Loop over the layers in original network
-    total_i = 1  # tracks number of all layers in our model
+    i = 0
     conv_i = 0
-    relu_i = 0
-    pool_i = 0
-    style_i = 0
-    content_i = 0
     last_significant_layer = 0
 
     for layer in model_copy.children():
@@ -132,17 +128,14 @@ def rebuild_model(nn_model, content_image, style_image,
         # In vgg we only use nn.Conv2d,  nn.ReLU, nn.MaxPool2d
         # For naming conventions use "Conv2d_{}".format(i) and appropiately for other instances
 
-        total_i += 1
+        i += 1
+        temp_name = ""
 
         if isinstance(layer, nn.Conv2d):
             conv_i += 1
-            name = "Conv2d_{}".format(conv_i)
-        elif isinstance(layer, nn.ReLU):
-            relu_i += 1
-            name = "ReLU_{}".format(relu_i)
-        else:
-            pool_i += 1
-            name = "MaxPool2d_{}".format(pool_i)
+            temp_name = "Conv2d_{}".format(conv_i)
+
+        name = (type(layer).__name__ + "_{}").format(i)
 
         # Layer has now numerated name so we can find it easily
         # Add it to our model
@@ -152,7 +145,7 @@ def rebuild_model(nn_model, content_image, style_image,
         # After adding check if it is a layer after which we should add our content
         # or style layer
         # Check for content layers
-        if name in content_layers_req:
+        if temp_name in content_layers_req:
             # Get the activations for original content image in this layer
             # and detach the from pytorch's graph
 
@@ -164,15 +157,14 @@ def rebuild_model(nn_model, content_image, style_image,
 
             # Append it to the module with proper name
 
-            total_i += 1
-            content_i += 1
-            content_layer_name = "Content_{}".format(content_i)
+            i += 1
+            content_layer_name = (type(content_layer).__name__ + "_{}").format(i)
             new_model.add_module(content_layer_name, content_layer)
             content_layers_list.append(content_layer)
-            last_significant_layer = total_i
+            last_significant_layer = i + 1
 
         # Check for style layers
-        if name in style_layers_req:
+        if temp_name in style_layers_req:
             # Get the activations for original style image in this layer
             # and detach the from pytorch's graph
 
@@ -184,12 +176,11 @@ def rebuild_model(nn_model, content_image, style_image,
 
             # Append it to the module with proper name
 
-            total_i += 1
-            style_i += 1
-            style_layer_name = "Style_{}".format(style_i)
+            i += 1
+            style_layer_name = (type(style_layer).__name__ + "_{}").format(i)
             new_model.add_module(style_layer_name, style_layer)
             style_layers_list.append(style_layer)
-            last_significant_layer = total_i
+            last_significant_layer = i + 1
 
     # Add this point our new model is the same as input model but with
     # StyleLayers and ContentLayers inserted after required layers
