@@ -168,7 +168,7 @@ def rebuild_model(nn_model, content_image, style_image,
         if temp_name in style_layers_req:
             # Get the activations for original style image in this layer
             # and detach the from pytorch's graph
-
+            print(style_image.size())
             style_activations = new_model.forward(style_image).detach()
 
             # Create the style layer
@@ -232,16 +232,20 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    # Add code here
+    content_tensor_image = image_loader('mountain-landscape-2031539_1280.jpg')
+    style_tensor_image = image_loader('Starry-Night-canvas-Vincent-van-Gogh-New-1889.jpg')
 
     # Assert that they're same size
 
-    # Add code here
+    assert content_tensor_image.size() == style_tensor_image.size(), 'Images are not the same size!'
 
     # Display them
 
-    # Add code here
+    show_tensor(content_tensor_image)
+    show_tensor(style_tensor_image)
 
+    new_model = rebuild_model(model,content_tensor_image.unsqueeze(0),style_tensor_image.unsqueeze(0),mean,std,content_layers_req,style_layers_req)
+    pprint.pprint(new_model)
     # Run style transfer
 
     # Add code here
