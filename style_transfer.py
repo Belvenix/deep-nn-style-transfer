@@ -208,14 +208,11 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
     new_model, style_layers, content_layers = rebuild_model(nn_model, content_image.unsqueeze(0),
                                                             style_image.unsqueeze(0), normalize_mean, normalize_std,
                                                             content_layers_req, style_layers_req)
+    input_batch = input_image.unsqueeze(0)
 
     # Get the LBFGS optimizer
 
-    optimizer = get_optimizer(input_image)
- 
-    # Get the LBFGS optimizer
-
-    optimizer = get_optimizer(input_image)
+    optimizer = get_optimizer(input_batch)
 
     # Run the optimizer for num_steps
 
@@ -234,13 +231,13 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
             # Inside closure function
             # correct the values of updated input image to range from 0 to 1 with clamp_()
 
-            input_image.clamp_(0, 1)
+            # input_batch.clamp_(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
 
             optimizer.zero_grad()
-            output = new_model(input_image)
+            output = new_model(input_batch)
 
             # Compute the style and content stores
             # based on values computed in style/content layers during forward propagation
@@ -287,7 +284,7 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
     # return image
 
-    return input_image
+    return input_batch[0]
 
 
 if __name__ == '__main__':
@@ -313,8 +310,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader('mountain-landscape-2031539_1280.jpg')
-    style_tensor_image = image_loader('Starry-Night-canvas-Vincent-van-Gogh-New-1889.jpg')
+    content_tensor_image = image_loader("content_sample_2.jpg")
+    style_tensor_image = image_loader("style_sample.jpg")
 
     # Assert that they're same size
 
@@ -327,8 +324,10 @@ if __name__ == '__main__':
 
     # Run style transfer
 
-    # Add code here
+    input_image = torch.randn(size=(3, imsize[0], imsize[1]), device=device)
+    result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
+                            mean, std, content_layers_req, style_layers_req)
 
     # Show results
 
-    # Add code here
+    show_tensor(result)
