@@ -134,6 +134,9 @@ def rebuild_model(nn_model, content_image, style_image,
         if isinstance(layer, nn.Conv2d):
             layer_i += 1
 
+        if isinstance(layer, nn.ReLU):
+            layer = nn.ReLU(inplace=False)
+
         name = (type(layer).__name__ + "_{}").format(layer_i)
 
         # Layer has now numerated name so we can find it easily
@@ -231,7 +234,8 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
             # Inside closure function
             # correct the values of updated input image to range from 0 to 1 with clamp_()
 
-            input_batch.clamp_(0, 1)
+            nonlocal input_batch
+            input_batch = input_batch.clamp(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
