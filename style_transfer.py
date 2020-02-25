@@ -180,7 +180,6 @@ def rebuild_model(nn_model, content_image, style_image,
             style_layers_list.append(style_layer)
             last_significant_layer = i + 1
 
-
     # Add this point our new model is the same as input model but with
     # StyleLayers and ContentLayers inserted after required layers
     # we don't need any layers after the last style or content layer
@@ -198,7 +197,6 @@ def get_optimizer(input_img):
     """Uses LBFGS as proposed by Gatys himself because it gives best results"""
     optimizer = optim.LBFGS([input_img.requires_grad_()])
     return optimizer
-
 
 
 # 6. Write training function
@@ -312,7 +310,9 @@ if __name__ == '__main__':
     show_tensor(content_tensor_image)
     show_tensor(style_tensor_image)
 
-    new_model,x,y = rebuild_model(model,content_tensor_image.unsqueeze(0),style_tensor_image.unsqueeze(0),mean,std,content_layers_req,style_layers_req)
+    new_model, style_layers, content_layers = rebuild_model(model, content_tensor_image.unsqueeze(0),
+                                                            style_tensor_image.unsqueeze(0), mean, std,
+                                                            content_layers_req, style_layers_req)
     pprint.pprint(new_model)
     # Run style transfer
 
@@ -321,6 +321,3 @@ if __name__ == '__main__':
     # Show results
 
     # Add code here
-
-    # Testing the gitHub ~ Jakub
-    # Testing the gitHub ~ Jakub
