@@ -129,12 +129,10 @@ def rebuild_model(nn_model, content_image, style_image,
         # In vgg we only use nn.Conv2d,  nn.ReLU, nn.MaxPool2d
         # For naming conventions use "Conv2d_{}".format(i) and appropiately for other instances
 
-        temp_name = ""
         i += 1
 
         if isinstance(layer, nn.Conv2d):
             layer_i += 1
-            temp_name = "Conv2d_{}".format(layer_i)
 
         name = (type(layer).__name__ + "_{}").format(layer_i)
 
@@ -146,7 +144,7 @@ def rebuild_model(nn_model, content_image, style_image,
         # After adding check if it is a layer after which we should add our content
         # or style layer
         # Check for content layers
-        if temp_name in content_layers_req:
+        if name in content_layers_req:
             # Get the activations for original content image in this layer
             # and detach the from pytorch's graph
 
@@ -165,7 +163,7 @@ def rebuild_model(nn_model, content_image, style_image,
             last_significant_layer = i + 1
 
         # Check for style layers
-        if temp_name in style_layers_req:
+        if name in style_layers_req:
             # Get the activations for original style image in this layer
             # and detach the from pytorch's graph
             style_activations = new_model.forward(style_image).detach()
