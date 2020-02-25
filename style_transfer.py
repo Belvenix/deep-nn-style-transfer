@@ -277,17 +277,17 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
         # Optimizer step
 
-        # ADD CODE HERE
+        optimizer.step(closure)
 
     # LOOP END
 
     # Clamp the image values to a range from 0 to 1
 
-    # ADD CODE HERE
+    input_image.clamp_(0, 1)
 
     # return image
 
-    # ADD CODE HERE
+    return input_image
 
 
 if __name__ == '__main__':
