@@ -180,7 +180,6 @@ def rebuild_model(nn_model, content_image, style_image,
             style_layers_list.append(style_layer)
             last_significant_layer = i + 1
 
-
     # Add this point our new model is the same as input model but with
     # StyleLayers and ContentLayers inserted after required layers
     # we don't need any layers after the last style or content layer
@@ -200,80 +199,90 @@ def get_optimizer(input_img):
     return optimizer
 
 
-
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
                    content_layers_req, style_layers_req, num_steps=500, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
- 
-    # ADD CODE HERE
- 
+
+    new_model, style_layers, content_layers = rebuild_model(nn_model, content_image.unsqueeze(0),
+                                                            style_image.unsqueeze(0), normalize_mean, normalize_std,
+                                                            content_layers_req, style_layers_req)
+
     # Get the LBFGS optimizer
 
-    # ADD CODE HERE
- 
+    optimizer = get_optimizer(input_image)
+
     # Run the optimizer for num_steps
-    
+
     # To work with optimizer like LBFGS  you need to use something called "closure"
     # http://sagecal.sourceforge.net/pytorch/index.html <- info here
-    
+
     # Basically you need to put all the training code in function  defined inside the loop
     # and then pass the function as input to step() method of LBFGS optimizer.
     # Gradients are zeroed with zero_grad() inside this function, same for loss' backward() method
     # closure returns computed loss
-    
+
     # LOOP START
-    
+    for i in range(num_steps):
         # DEFINE THE CLOSURE FUNCTIONS START
+        def closure():
             # Inside closure function
-            
             # correct the values of updated input image to range from 0 to 1 with clamp_()
-            
-            # ADD CODE HERE
+
+            input_image.clamp_(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
-            
-            # ADD CODE HERE
+
+            optimizer.zero_grad()
+            output = new_model(input_image)
 
             # Compute the style and content stores
             # based on values computed in style/content layers during forward propagation
-            
-            # ADD CODE HERE
+
+            style_loss = 0
+            for layer in style_layers:
+                style_loss = style_loss + layer.loss
+
+            content_loss = 0
+            for layer in content_layers:
+                content_loss = content_loss + layer.loss
 
             # We need to multiply the scores by weights
-            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf, 
+            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf,
             # formula nr. 7
-            
-            # ADD CODE HERE
+
+            weighed_style_loss = style_weight * style_loss
+            weighed_content_loss = content_weight * content_loss
 
             # Compute total loss and propagate it backwards
-            
-            # ADD CODE HERE
+
+            loss = weighed_style_loss + weighed_content_loss
+            loss.backward()
 
             # Print training info every X epochs
-            
-            # ADD CODE HERE
+
+            print("Epoch = " + str(i) + ", Loss = " + str(loss.item()))
 
             # return computed total score value
-            
-            # ADD CODE HERE
-                
+
+            return loss
+
         # DEFINE THE CLOSURE FUNCTIONS ENDS
-    
+
         # Optimizer step
-        
+
         # ADD CODE HERE
-        
+
     # LOOP END
 
-    # Clamp the image values to a range from 0 to 1 
+    # Clamp the image values to a range from 0 to 1
 
     # ADD CODE HERE
 
     # return image
-    
+
     # ADD CODE HERE
 
 
@@ -312,7 +321,9 @@ if __name__ == '__main__':
     show_tensor(content_tensor_image)
     show_tensor(style_tensor_image)
 
-    new_model,x,y = rebuild_model(model,content_tensor_image.unsqueeze(0),style_tensor_image.unsqueeze(0),mean,std,content_layers_req,style_layers_req)
+    new_model, style_layers, content_layers = rebuild_model(model, content_tensor_image.unsqueeze(0),
+                                                            style_tensor_image.unsqueeze(0), mean, std,
+                                                            content_layers_req, style_layers_req)
     pprint.pprint(new_model)
     # Run style transfer
 
@@ -321,6 +332,3 @@ if __name__ == '__main__':
     # Show results
 
     # Add code here
-
-    # Testing the gitHub ~ Jakub
-    # Testing the gitHub ~ Jakub
