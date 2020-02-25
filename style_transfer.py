@@ -202,10 +202,79 @@ def get_optimizer(input_img):
 
 
 # 6. Write training function
-def style_transfer():
+def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
+                   content_layers_req, style_layers_req, num_steps=500, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
-    # Add code here
-    pass
+    # Get the rebuilded model and style and content layers
+ 
+    # ADD CODE HERE
+ 
+    # Get the LBFGS optimizer
+
+    # ADD CODE HERE
+ 
+    # Run the optimizer for num_steps
+    
+    # To work with optimizer like LBFGS  you need to use something called "closure"
+    # http://sagecal.sourceforge.net/pytorch/index.html <- info here
+    
+    # Basically you need to put all the training code in function  defined inside the loop
+    # and then pass the function as input to step() method of LBFGS optimizer.
+    # Gradients are zeroed with zero_grad() inside this function, same for loss' backward() method
+    # closure returns computed loss
+    
+    # LOOP START
+    
+        # DEFINE THE CLOSURE FUNCTIONS START
+            # Inside closure function
+            
+            # correct the values of updated input image to range from 0 to 1 with clamp_()
+            
+            # ADD CODE HERE
+
+            # Zero the gradients from last iteration and
+            # forward the image through network
+            
+            # ADD CODE HERE
+
+            # Compute the style and content stores
+            # based on values computed in style/content layers during forward propagation
+            
+            # ADD CODE HERE
+
+            # We need to multiply the scores by weights
+            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf, 
+            # formula nr. 7
+            
+            # ADD CODE HERE
+
+            # Compute total loss and propagate it backwards
+            
+            # ADD CODE HERE
+
+            # Print training info every X epochs
+            
+            # ADD CODE HERE
+
+            # return computed total score value
+            
+            # ADD CODE HERE
+                
+        # DEFINE THE CLOSURE FUNCTIONS ENDS
+    
+        # Optimizer step
+        
+        # ADD CODE HERE
+        
+    # LOOP END
+
+    # Clamp the image values to a range from 0 to 1 
+
+    # ADD CODE HERE
+
+    # return image
+    
+    # ADD CODE HERE
 
 
 if __name__ == '__main__':
