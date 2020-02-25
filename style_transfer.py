@@ -321,10 +321,6 @@ if __name__ == '__main__':
     show_tensor(content_tensor_image)
     show_tensor(style_tensor_image)
 
-    new_model, style_layers, content_layers = rebuild_model(model, content_tensor_image.unsqueeze(0),
-                                                            style_tensor_image.unsqueeze(0), mean, std,
-                                                            content_layers_req, style_layers_req)
-    pprint.pprint(new_model)
     # Run style transfer
 
     # Add code here
