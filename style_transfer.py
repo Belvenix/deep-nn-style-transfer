@@ -212,6 +212,10 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
     # Get the LBFGS optimizer
 
     optimizer = get_optimizer(input_image)
+ 
+    # Get the LBFGS optimizer
+
+    optimizer = get_optimizer(input_image)
 
     # Run the optimizer for num_steps
 
