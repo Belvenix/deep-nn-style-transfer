@@ -170,10 +170,11 @@ def rebuild_model(nn_model, content_image, style_image,
 
 
 # 5. Define the optimizer
-def get_optimizer():
+def get_optimizer(input_img):
     """Uses LBFGS as proposed by Gatys himself because it gives best results"""
-      # Add code here
-      pass
+    optimizer = optim.LBFGS([input_img.requires_grad_()])
+    return optimizer
+
 
 
 # 6. Write training function
