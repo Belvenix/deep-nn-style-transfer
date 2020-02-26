@@ -213,6 +213,8 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
                                                             content_layers_req, style_layers_req)
     input_batch = input_image.unsqueeze(0)
 
+    style_layer_weight = 1 / len(style_layers)
+
     # Get the LBFGS optimizer
 
     optimizer = get_optimizer(input_batch)
@@ -258,7 +260,7 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
             # as described in the paper https://arxiv.org/pdf/1508.06576.pdf,
             # formula nr. 7
 
-            weighed_style_loss = style_weight * style_loss
+            weighed_style_loss = style_layer_weight * style_weight * style_loss
             weighed_content_loss = content_weight * content_loss
 
             # Compute total loss and propagate it backwards
@@ -268,7 +270,8 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
             # Print training info every X epochs
 
-            print("Epoch = " + str(i) + ", Loss = " + str(loss.item()))
+            print("Epoch = " + str(i) + "\t Style_loss = " + str(weighed_style_loss.item())
+                  + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
 
             # return computed total score value
 
