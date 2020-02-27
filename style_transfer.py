@@ -235,9 +235,8 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
         def closure():
             # Inside closure function
             # correct the values of updated input image to range from 0 to 1 with clamp_()
-
-            #nonlocal input_batch
-            input_batch.data.clamp(0, 1)
+            with torch.no_grad():
+                input_batch.clamp_(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
