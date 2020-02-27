@@ -18,8 +18,8 @@ from Layers.ContentLayer import ContentLayer
 from Layers.StyleLayer import StyleLayer
 
 # -- CONSTANTS --
-imsize = (300, 300)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+imsize = (512,512) if torch.cuda.is_available() else (300,300)
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
 
