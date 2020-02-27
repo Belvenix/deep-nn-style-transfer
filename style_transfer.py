@@ -204,7 +204,7 @@ def get_optimizer(input_img):
 
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=500, style_weight=100000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=3, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
@@ -236,14 +236,14 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
             # Inside closure function
             # correct the values of updated input image to range from 0 to 1 with clamp_()
 
-            nonlocal input_batch
-            input_batch = input_batch.clamp(0, 1)
+            #nonlocal input_batch
+            input_batch.data.clamp(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
 
             optimizer.zero_grad()
-            output = new_model(input_batch)
+            new_model(input_batch)
 
             # Compute the style and content stores
             # based on values computed in style/content layers during forward propagation
@@ -287,7 +287,7 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
     # Clamp the image values to a range from 0 to 1
 
-    input_image.clamp_(0, 1)
+    input_image.data.clamp_(0, 1)
 
     # return image
 
@@ -331,7 +331,7 @@ if __name__ == '__main__':
 
     # Run style transfer
 
-    input_image = torch.randn(size=(3, imsize[0], imsize[1]), device=device)
+    input_image = content_tensor_image.clone()
     result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req)
 
