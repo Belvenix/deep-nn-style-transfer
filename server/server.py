@@ -1,13 +1,17 @@
-from flask import Flask, flash, url_for, render_template
+from flask import Flask, url_for, render_template, request
+from pathlib import Path
 
+
+import os
 import torch
 import torchvision.models as models
 
 app = Flask(__name__)
 
-SESSION_TYPE = 'filesystem'
-UPLOAD_FOLDER = '/var/www/uploads/'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+# https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
+
+SERVER_ROOT = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = Path(SERVER_ROOT).parent
 
 # TASKS:
 # 1. Write function that loads the model and prepares it on server launch
@@ -22,13 +26,24 @@ def initialize(app):
 
 # 2. Write simple homepage that let's you upload an content and style images
 
-@app.route('/', methods=['POST','GET'])
+@app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/upload')
+@app.route('/upload', methods=["POST"])
 def upload():
-    pass
+    ifile = request.files['inputFile']
+    target = os.path.join(PROJECT_ROOT, 'images/')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+        
+    print(ifile)
+    filename = ifile.filename
+    destination = "/".join([target, filename])
+    print(destination)
+    ifile.save(destination)
+        
+    return render_template("uploaded.html")
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images from uploaded content/style images
 # 3.1 Write a simple front that shows progress or gives the user information that the image is being generated
