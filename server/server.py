@@ -1,6 +1,10 @@
 from flask import Flask, flash, request, redirect, url_for, render_template, session
 from werkzeug.utils import secure_filename
 from flask_session import Session
+from flask import send_from_directory
+
+import torch
+import torchvision.models as models
 
 app = Flask(__name__)
 sess = Session()
@@ -9,8 +13,24 @@ SESSION_TYPE = 'filesystem'
 UPLOAD_FOLDER = '/var/www/uploads/'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['SESSION_TYPE'] = SESSION_TYPE
+
+
+def initialize(app):
+    app.mean = [0.485, 0.456, 0.406]
+    app.std = [0.229, 0.224, 0.225]
+    app.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    app.vgg19_model = models.vgg19(pretrained=True).features.to(app.device).eval()
+    app.imsize = (512,512) if torch.cuda.is_available() else (300,300)
+    
+    #For session to work we need a key
+    app.secret_key = 'super secret key'
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+    app.config['SESSION_TYPE'] = SESSION_TYPE
+    
+    #Debug print to check whether we initialize it once
+    print(app.vgg19_model)
+    sess.init_app(app)
 
 # TASKS:
 # 1. Write function that loads the model and prepares it on server launch
@@ -52,9 +72,12 @@ def upload_file():
                                     filename=filename))
     return render_template('index.html')
 
-if __name__ == "__main__":
-    app.secret_key = 'super secret key'
-    app.config['SESSION_TYPE'] = 'filesystem'
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
 
-    sess.init_app(app)
+if __name__ == "__main__":
+    
+    initialize(app)    
     app.run(debug=True)
