@@ -1,7 +1,4 @@
-from flask import Flask, flash, request, redirect, url_for, render_template, session
-from werkzeug.utils import secure_filename
-from flask_session import Session
-from flask import send_from_directory
+from flask import Flask, flash, url_for, render_template
 
 import torch
 import torchvision.models as models
