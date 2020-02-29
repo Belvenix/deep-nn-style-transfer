@@ -18,8 +18,8 @@ from Layers.ContentLayer import ContentLayer
 from Layers.StyleLayer import StyleLayer
 
 # -- CONSTANTS --
-imsize = (300, 300)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+imsize = (512,512) if torch.cuda.is_available() else (300,300)
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
 
@@ -134,6 +134,9 @@ def rebuild_model(nn_model, content_image, style_image,
         if isinstance(layer, nn.Conv2d):
             layer_i += 1
 
+        if isinstance(layer, nn.ReLU):
+            layer = nn.ReLU(inplace=False)
+
         name = (type(layer).__name__ + "_{}").format(layer_i)
 
         # Layer has now numerated name so we can find it easily
@@ -180,7 +183,6 @@ def rebuild_model(nn_model, content_image, style_image,
             style_layers_list.append(style_layer)
             last_significant_layer = i + 1
 
-
     # Add this point our new model is the same as input model but with
     # StyleLayers and ContentLayers inserted after required layers
     # we don't need any layers after the last style or content layer
@@ -200,81 +202,95 @@ def get_optimizer(input_img):
     return optimizer
 
 
-
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=500, style_weight=100000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=3, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
- 
-    # ADD CODE HERE
- 
+
+    new_model, style_layers, content_layers = rebuild_model(nn_model, content_image.unsqueeze(0),
+                                                            style_image.unsqueeze(0), normalize_mean, normalize_std,
+                                                            content_layers_req, style_layers_req)
+    input_batch = input_image.unsqueeze(0)
+
+    style_layer_weight = 1 / len(style_layers)
+
     # Get the LBFGS optimizer
 
-    # ADD CODE HERE
- 
+    optimizer = get_optimizer(input_batch)
+
     # Run the optimizer for num_steps
-    
+
     # To work with optimizer like LBFGS  you need to use something called "closure"
     # http://sagecal.sourceforge.net/pytorch/index.html <- info here
-    
+
     # Basically you need to put all the training code in function  defined inside the loop
     # and then pass the function as input to step() method of LBFGS optimizer.
     # Gradients are zeroed with zero_grad() inside this function, same for loss' backward() method
     # closure returns computed loss
-    
+
     # LOOP START
-    
+    for i in range(num_steps):
         # DEFINE THE CLOSURE FUNCTIONS START
+        def closure():
             # Inside closure function
-            
             # correct the values of updated input image to range from 0 to 1 with clamp_()
-            
-            # ADD CODE HERE
+            with torch.no_grad():
+                input_batch.clamp_(0, 1)
 
             # Zero the gradients from last iteration and
             # forward the image through network
-            
-            # ADD CODE HERE
+
+            optimizer.zero_grad()
+            new_model(input_batch)
 
             # Compute the style and content stores
             # based on values computed in style/content layers during forward propagation
-            
-            # ADD CODE HERE
+
+            style_loss = 0
+            for layer in style_layers:
+                style_loss = style_loss + layer.loss
+
+            content_loss = 0
+            for layer in content_layers:
+                content_loss = content_loss + layer.loss
 
             # We need to multiply the scores by weights
-            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf, 
+            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf,
             # formula nr. 7
-            
-            # ADD CODE HERE
+
+            weighed_style_loss = style_layer_weight * style_weight * style_loss
+            weighed_content_loss = content_weight * content_loss
 
             # Compute total loss and propagate it backwards
-            
-            # ADD CODE HERE
+
+            loss = weighed_style_loss + weighed_content_loss
+            loss.backward()
 
             # Print training info every X epochs
-            
-            # ADD CODE HERE
+
+            print("Epoch = " + str(i) + "\t Style_loss = " + str(weighed_style_loss.item())
+                  + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
 
             # return computed total score value
-            
-            # ADD CODE HERE
-                
+
+            return loss
+
         # DEFINE THE CLOSURE FUNCTIONS ENDS
-    
+
         # Optimizer step
-        
-        # ADD CODE HERE
-        
+
+        optimizer.step(closure)
+
     # LOOP END
 
-    # Clamp the image values to a range from 0 to 1 
+    # Clamp the image values to a range from 0 to 1
 
-    # ADD CODE HERE
+    input_image.data.clamp_(0, 1)
 
     # return image
-    
-    # ADD CODE HERE
+
+    return input_batch[0]
 
 
 if __name__ == '__main__':
@@ -300,8 +316,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader('mountain-landscape-2031539_1280.jpg')
-    style_tensor_image = image_loader('Starry-Night-canvas-Vincent-van-Gogh-New-1889.jpg')
+    content_tensor_image = image_loader("content_sample_2.jpg")
+    style_tensor_image = image_loader("style_sample.jpg")
 
     # Assert that they're same size
 
@@ -312,15 +328,12 @@ if __name__ == '__main__':
     show_tensor(content_tensor_image)
     show_tensor(style_tensor_image)
 
-    new_model,x,y = rebuild_model(model,content_tensor_image.unsqueeze(0),style_tensor_image.unsqueeze(0),mean,std,content_layers_req,style_layers_req)
-    pprint.pprint(new_model)
     # Run style transfer
 
-    # Add code here
+    input_image = content_tensor_image.clone()
+    result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
+                            mean, std, content_layers_req, style_layers_req)
 
     # Show results
 
-    # Add code here
-
-    # Testing the gitHub ~ Jakub
-    # Testing the gitHub ~ Jakub
+    show_tensor(result)
