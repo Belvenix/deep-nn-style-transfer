@@ -8,8 +8,6 @@ import torchvision.models as models
 
 app = Flask(__name__)
 
-# https://stackoverflow.com/questions/2860153/how-do-i-get-the-parent-directory-in-python
-
 SERVER_ROOT = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = Path(SERVER_ROOT).parent
 
@@ -17,12 +15,11 @@ PROJECT_ROOT = Path(SERVER_ROOT).parent
 # 1. Write function that loads the model and prepares it on server launch
 # 1.1 Make it so it only loads on >>server launch<< not on every user connection if you know how
 
-def initialize(app):
-    app.mean = [0.485, 0.456, 0.406]
-    app.std = [0.229, 0.224, 0.225]
-    app.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    app.vgg19_model = models.vgg19(pretrained=True).features.to(app.device).eval()
-    app.imsize = (512,512) if torch.cuda.is_available() else (300,300)
+MEAN_STANDARDIZED = [0.485, 0.456, 0.406]
+STD_STANDARDIZED = [0.229, 0.224, 0.225]
+DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+VGG19_MODEL = models.vgg19(pretrained=True).features.to(DEVICE).eval()
+IMSIZE = (512,512) if torch.cuda.is_available() else (300,300)
 
 # 2. Write simple homepage that let's you upload an content and style images
 
@@ -52,6 +49,5 @@ def upload():
 
 
 if __name__ == "__main__":
-    
-    initialize(app)    
+        
     app.run(debug=True)
