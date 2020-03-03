@@ -19,8 +19,7 @@ from Layers.StyleLayer import StyleLayer
 
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
-imsize = (300, 300)
+imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
 
@@ -205,7 +204,7 @@ def get_optimizer(input_img):
 
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=25, style_weight=10000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=15, style_weight=10000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
@@ -306,8 +305,8 @@ if __name__ == '__main__':
 
     # Define after which layers we want to input our content/style layers
     # they will enable us to compute the style and content losses during forward propagation
-    content_layers_req = ["Conv2d_5"]  # pick layer near the middle
-    style_layers_req = ["Conv2d_1", "Conv2d_2", "Conv2d_3", "Conv2d_4", "Conv2d_5", "Conv2d_6", "Conv2d_7", "Conv2d_8"]
+    content_layers_req = ["Conv2d_10"]  # pick layer near the end
+    style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]  # pick layers after pooling
 
     # VGG19 specific mean and std used to normalize images during it's training
     # We will normalize our images using those same values to ensure best results
