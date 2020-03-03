@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-
 class ContentLayer(nn.Module):
     """
     Define the custom content layer used to compute the content loss
