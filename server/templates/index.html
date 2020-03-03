@@ -1,35 +1,38 @@
 {% extends 'page_template.html' %}
 
-{% block head %}
-<title>Neural Style Transfer Application</title>
-{% endblock %}
 
 {% block body %}
 <div class = "content">
-    <h1>NST Application</h1>
+    <h1 class="centeredText">NST Application</h1>
 
     <table>
         <tr>
             <th>File name</th>
             <th>File thumbnail</th>
-            <th>Added</th>
             <th>Actions</th>
         </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td>
-                <a href ="">Run Style Transfer</a>
-                <br>
-                <a href ="">Delete</a>
-            </td>
-        </tr>
+        {% if photos %}
+            {% for key, value in photos.items() %}
+                <tr>
+                    <td>{{ value }}</td>
+                    <td>TODO</td>
+                    <td>
+                        <a href ="">Run Style Transfer</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% else %}
+                <tr>
+                    <td colspan=4>
+                        Please upload some images!
+                    </td>
+                </tr>
+        {% endif %}
     </table>
 
     <br>
     <!-- We use the Jinja syntax to get to upload function and if we upload the file we have to specify the enctype -->
-    <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+    <form class = "centeredText" id="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
         <div>
             <label for="inputFile">Select a file:</label>
             <input type="file" name="inputFile">

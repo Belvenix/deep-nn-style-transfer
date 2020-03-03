@@ -1,11 +1,11 @@
 {% extends 'page_template.html' %}
 
-{% block head %}
-<title>Neural Style Transfer Application</title>
-{% endblock %}
 
 {% block body %}
+<div name ="Success message"></div>
+    <h1>You have successfully uploaded the file</h1>
 
-<h1>You have successfully uploaded the file</h1>
+    Click <a href="{{ url_for('index') }}">here</a> go to back to the main page: 
+</div>
 
 {% endblock %}
