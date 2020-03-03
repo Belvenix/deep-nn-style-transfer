@@ -204,7 +204,7 @@ def get_optimizer(input_img):
 
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=15, style_weight=10000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=15, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
