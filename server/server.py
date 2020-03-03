@@ -8,10 +8,11 @@ import torchvision.models as models
 
 app = Flask(__name__)
 
+
 SERVER_ROOT = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = Path(SERVER_ROOT).parent
-IMAGE_FOLDER = 'images/uploads'
-
+IMAGE_FOLDER = 'images'
+UPLOAD_FOLDER = 'images\\uploads'
 # TASKS:
 # 1. Write function that loads the model and prepares it on server launch
 # 1.1 Make it so it only loads on >>server launch<< not on every user connection if you know how
@@ -26,9 +27,6 @@ ALLOWED_FILE_FORMATS = ['.png', '.jpg', '.jpeg']
 # 2. Write simple homepage that let's you upload an content and style images
 
 def check_file(filename):
-    if filename == '':
-        flash('No selected file')
-        return False
     ext = os.path.splitext(filename)[-1].lower()
     if ext in ALLOWED_FILE_FORMATS:
         return True
@@ -37,7 +35,7 @@ def check_file(filename):
 
 def save_file(file):
     try:
-        target = os.path.join(PROJECT_ROOT, IMAGE_FOLDER)
+        target = os.path.join(PROJECT_ROOT, UPLOAD_FOLDER)
         if not os.path.isdir(target):
             os.mkdir(target)
         filename = secure_filename(file.filename)
@@ -47,14 +45,23 @@ def save_file(file):
     except:
         return False
 
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    photos_dict = dict()
+    imgPath = os.path.join(PROJECT_ROOT, UPLOAD_FOLDER)
+    if os.path.isdir(imgPath):
+        for filename in os.listdir(imgPath):
+            photos_dict[filename] = filename
+    print(photos_dict)
+    return render_template('index.html',photos = photos_dict)
 
 @app.route('/upload', methods=["POST"])
 def upload():
+    #Alternatively we could use flash method in order to show the message to the user with error message
     ifile = request.files['inputFile']
-
+    if ifile.filename == "":
+        return redirect(url_for('fail_page', reason="No file was selected!"))
     if check_file(ifile.filename) == True:
         if save_file(ifile) == True:
             return render_template("uploaded.html")
@@ -62,7 +69,12 @@ def upload():
             return redirect(url_for('fail_page', reason="Couldn't save the file"))
     else:
         return redirect(url_for('fail_page', reason='Invalid file format'))
-        
+
+
+@app.route('/styleTransfer')
+def run_style_transfer():
+    return render_template("run_style_transfer.html")
+
 @app.route('/fail/<reason>')
 def fail_page(reason):
     return render_template("upload_fail.html", reason = reason)
