@@ -317,7 +317,7 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader("torun.jpg")
+    content_tensor_image = image_loader("content_sample_1.jpg")
     style_tensor_image = image_loader("pixelart.jpg")
 
     # Assert that they're same size
