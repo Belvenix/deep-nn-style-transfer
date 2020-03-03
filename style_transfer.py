@@ -306,8 +306,8 @@ if __name__ == '__main__':
 
     # Define after which layers we want to input our content/style layers
     # they will enable us to compute the style and content losses during forward propagation
-    content_layers_req = ["Conv2d_10"]  # pick layer near the middle
-    style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]
+    content_layers_req = ["Conv2d_5"]  # pick layer near the middle
+    style_layers_req = ["Conv2d_1", "Conv2d_2", "Conv2d_3", "Conv2d_4", "Conv2d_5", "Conv2d_6", "Conv2d_7", "Conv2d_8"]
 
     # VGG19 specific mean and std used to normalize images during it's training
     # We will normalize our images using those same values to ensure best results
@@ -318,7 +318,7 @@ if __name__ == '__main__':
     # Load the images as preprocessed tensors
 
     content_tensor_image = image_loader("content_sample_1.jpg")
-    style_tensor_image = image_loader("pixelart.jpg")
+    style_tensor_image = image_loader("style_sample_1.jpg")
 
     # Assert that they're same size
 
