@@ -1,6 +1,6 @@
-from flask import Flask, url_for, render_template, request
+from flask import Flask, url_for, render_template, request, redirect, flash
 from pathlib import Path
-
+from werkzeug.utils import secure_filename
 
 import os
 import torch
@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 SERVER_ROOT = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = Path(SERVER_ROOT).parent
+IMAGE_FOLDER = 'images/uploads'
 
 # TASKS:
 # 1. Write function that loads the model and prepares it on server launch
@@ -20,8 +21,31 @@ STD_STANDARDIZED = [0.229, 0.224, 0.225]
 DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 VGG19_MODEL = models.vgg19(pretrained=True).features.to(DEVICE).eval()
 IMSIZE = (512,512) if torch.cuda.is_available() else (300,300)
+ALLOWED_FILE_FORMATS = ['.png', '.jpg', '.jpeg']
 
 # 2. Write simple homepage that let's you upload an content and style images
+
+def check_file(filename):
+    if filename == '':
+        flash('No selected file')
+        return False
+    ext = os.path.splitext(filename)[-1].lower()
+    if ext in ALLOWED_FILE_FORMATS:
+        return True
+    else:
+        return False
+
+def save_file(file):
+    try:
+        target = os.path.join(PROJECT_ROOT, IMAGE_FOLDER)
+        if not os.path.isdir(target):
+            os.mkdir(target)
+        filename = secure_filename(file.filename)
+        destination = "/".join([target, filename])
+        file.save(destination)
+        return True
+    except:
+        return False
 
 @app.route('/')
 def index():
@@ -30,17 +54,18 @@ def index():
 @app.route('/upload', methods=["POST"])
 def upload():
     ifile = request.files['inputFile']
-    target = os.path.join(PROJECT_ROOT, 'images/')
-    if not os.path.isdir(target):
-        os.mkdir(target)
+
+    if check_file(ifile.filename) == True:
+        if save_file(ifile) == True:
+            return render_template("uploaded.html")
+        else:
+            return redirect(url_for('fail_page', reason="Couldn't save the file"))
+    else:
+        return redirect(url_for('fail_page', reason='Invalid file format'))
         
-    print(ifile)
-    filename = ifile.filename
-    destination = "/".join([target, filename])
-    print(destination)
-    ifile.save(destination)
-        
-    return render_template("uploaded.html")
+@app.route('/fail/<reason>')
+def fail_page(reason):
+    return render_template("upload_fail.html", reason = reason)
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images from uploaded content/style images
 # 3.1 Write a simple front that shows progress or gives the user information that the image is being generated
