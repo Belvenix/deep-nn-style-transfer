@@ -287,7 +287,6 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
     input_image.data.clamp_(0, 1)
 
     # return image
-
     return input_batch[0]
 
 
