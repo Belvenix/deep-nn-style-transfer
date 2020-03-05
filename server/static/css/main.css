@@ -1,0 +1,37 @@
+body, html {
+    font-family: sans-serif;
+}
+table, td, th {
+    
+    border: 1px solid #aaaaaa;
+}
+
+table {
+    border-collapse: collapse;
+    width: 50%;
+    float: center;
+    margin: auto;
+}
+
+th {
+    height: 30px
+}
+
+td {
+    text-align: center;
+    padding: 5px;
+}
+
+#content {
+    width: 70%;
+}
+
+.form {
+    margin-top: 20px;
+    float: center;
+    text-align: center;
+}
+
+.centeredText {
+    text-align: center;
+}

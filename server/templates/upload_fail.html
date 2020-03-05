@@ -1,0 +1,15 @@
+{% extends 'page_template.html' %}
+
+
+{% block body %}
+
+<div name ="Error message">
+    <h1>Oops... Something went wrong.</h1><br/>
+    <h2>
+    The following error has occured: {{ reason }}
+    </h2>
+    Click <a href="{{ url_for('index') }}">here</a> go to back to the main page: 
+</div>
+
+
+{% endblock %}
