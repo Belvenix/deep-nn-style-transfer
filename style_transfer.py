@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from PIL import Image
 
 import torchvision.models as models
@@ -7,7 +6,6 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.optim as optim
 
-import numpy as np
 import torch
 import pprint
 import copy

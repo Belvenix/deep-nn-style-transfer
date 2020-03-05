@@ -22,4 +22,3 @@ class NormalizeLayer(nn.Module):
         # Normalize the image
         norm_image = (image - self.mean) / self.std
         return norm_image
-
