@@ -41,7 +41,7 @@ def run_transfer():
     if style_image.mimetype not in ALLOWED_TYPES \
             or content_image.mimetype not in ALLOWED_TYPES:
         abort(415)
-        # TODO
+        # TODO handle wrong mimetype
 
     uid = uuid4()
     session['user_id'] = uid
@@ -63,13 +63,17 @@ def run_transfer():
 @app.route('/status')
 def get_status():
     job = queue.fetch_job(session['job_id'])
+
+    # TODO add progressbar and redirect after its done
     if job is None:
-        return "no job"
+        abort(500)
     progress = job.meta['progress']
+
     if progress is not None:
         return str(progress)
     else:
-        return "sth went wrong"
+        abort(500)
+
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images
 # from uploaded content/style images
