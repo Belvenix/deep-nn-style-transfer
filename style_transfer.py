@@ -19,7 +19,9 @@ from rq import get_current_job
 
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
+# imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
+imsize = (300, 300) if torch.cuda.is_available() else (300, 300)
+default_model = models.vgg19(pretrained=True).features.to(device).eval()
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
 
@@ -202,9 +204,26 @@ def get_optimizer(input_img):
     return optimizer
 
 
+def style_transfer_wrapper(style_filename, content_filename, output_filename):
+
+    style_tensor = image_loader(style_filename)
+    content_tensor = image_loader(content_filename)
+    input_tensor = content_tensor.clone()
+
+    content_layers_req = ["Conv2d_10"]
+    style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+
+    result = style_transfer(default_model, content_tensor, style_tensor, input_tensor,
+                            mean, std, content_layers_req, style_layers_req)
+
+    save_tensor(output_filename, result)
+
+
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=15, style_weight=100000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=5, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
@@ -237,6 +256,12 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
     # LOOP START
     for i in range(num_steps):
+
+        # Update rq job progress over iterations
+        if job is not None:
+            job.meta['progress'] = i / num_steps
+            job.save_meta()
+
         # DEFINE THE CLOSURE FUNCTIONS START
         def closure():
             # Inside closure function
@@ -277,11 +302,6 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
             print("Epoch = " + str(i) + "\t Style_loss = " + str(weighed_style_loss.item())
                   + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
-
-            # Update rq job progress over iterations
-            if job is not None:
-                job.meta['progress'] = i / num_steps
-                job.save_meta()
 
             # return computed total score value
 

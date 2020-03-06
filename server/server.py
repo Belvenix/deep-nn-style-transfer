@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request, redirect, abort
+from flask import Flask, render_template, request, redirect, abort, session, url_for
 from werkzeug.utils import secure_filename
 
 from redis import Redis
 import rq
 
+from uuid import uuid4
 import os
-import torch
-import torchvision.models as models
+
+from style_transfer import style_transfer_wrapper, RESULTS_PATH, IMAGES_PATH
 
 app = Flask(__name__)
 
@@ -20,38 +21,11 @@ ALLOWED_TYPES = ["image/jpeg"]
 # TASKS:
 # 1. Write function that loads the model and prepares it on server launch
 # 1.1 Make it so it only loads on >>server launch<< not on every user connection if you know how
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-model = models.vgg19(pretrained=True).features.to(device).eval()
 
 
 # 2. Write simple homepage that let's you upload an content and style images
 app.secret_key = os.urandom(16)
 queue = rq.Queue(RQ_WORKER_NAME, connection=Redis.from_url('redis://'))
-
-
-# def check_file(filename):
-#     ext = os.path.splitext(filename)[-1].lower()
-#
-#     if ext in ALLOWED_FILE_FORMATS:
-#         return True
-#     else:
-#         return False
-#
-#
-# def save_file(file):
-#     try:
-#         target = os.path.join(PROJECT_ROOT, UPLOAD_FOLDER)
-#
-#         if not os.path.isdir(target):
-#             os.mkdir(target)
-#
-#         filename = secure_filename(file.filename)
-#         destination = "/".join([target, filename])
-#         file.save(destination)
-#         return True
-#
-#     except:
-#         return False
 
 
 @app.route('/')
@@ -69,13 +43,38 @@ def run_transfer():
         abort(415)
         # TODO
 
+    uid = uuid4()
+    session['user_id'] = uid
+    style_image_name = str(uid) + "_style.jpg"
+    content_image_name = str(uid) + "_content.jpg"
+    output_image_name = str(uid) + "_out.jpg"
+
+    style_image.save(IMAGES_PATH + style_image_name)
+    content_image.save(IMAGES_PATH + content_image_name)
+
+    job = queue.enqueue(style_transfer_wrapper, style_image_name, content_image_name, output_image_name)
+    session['job_id'] = job.id
+    job.meta['progress'] = 0
+    job.save_meta()
+
+    return redirect(url_for('get_status'))
+
+
+@app.route('/status')
+def get_status():
+    job = queue.fetch_job(session['job_id'])
+    if job is None:
+        return "no job"
+    progress = job.meta['progress']
+    if progress is not None:
+        return str(progress)
+    else:
+        return "sth went wrong"
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images
 # from uploaded content/style images
 # 3.1 Write a simple front that shows progress or gives the user information that the image is being generated
 # 4. Present the result for user in simple front, maybe add download button so user can download the new image
-
-# def style_transfer_job(style_image, content_image):
 
 
 if __name__ == "__main__":
