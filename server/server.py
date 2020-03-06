@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, abort
 from werkzeug.utils import secure_filename
 
 from redis import Redis
@@ -14,6 +14,7 @@ app = Flask(__name__)
 # CONSTANTS
 RQ_WORKER_NAME = "transfer-task"
 REDIS_URL = "redis://"
+ALLOWED_TYPES = ["image/jpeg"]
 
 
 # TASKS:
@@ -60,8 +61,13 @@ def index():
 
 @app.route('/run_transfer', methods=["POST"])
 def run_transfer():
-    # Alternatively we could use flash method in order to show the message to the user with error message
-    queue.enqueue()
+    style_image = request.files.get('style_image')
+    content_image = request.files.get('content_image')
+
+    if style_image.mimetype not in ALLOWED_TYPES \
+            or content_image.mimetype not in ALLOWED_TYPES:
+        abort(415)
+        # TODO
 
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images
@@ -69,6 +75,7 @@ def run_transfer():
 # 3.1 Write a simple front that shows progress or gives the user information that the image is being generated
 # 4. Present the result for user in simple front, maybe add download button so user can download the new image
 
+# def style_transfer_job(style_image, content_image):
 
 
 if __name__ == "__main__":

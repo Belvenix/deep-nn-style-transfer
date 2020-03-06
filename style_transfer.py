@@ -15,6 +15,8 @@ from Layers.NormalizeLayer import NormalizeLayer
 from Layers.ContentLayer import ContentLayer
 from Layers.StyleLayer import StyleLayer
 
+from rq import get_current_job
+
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
@@ -206,6 +208,12 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
+    # Initialize rq job meta
+    job = get_current_job()
+    if job is not None:
+        job.meta['progress'] = 0
+        job.save_meta()
+
     new_model, style_layers, content_layers = rebuild_model(nn_model, content_image.unsqueeze(0),
                                                             style_image.unsqueeze(0), normalize_mean, normalize_std,
                                                             content_layers_req, style_layers_req)
@@ -269,6 +277,11 @@ def style_transfer(nn_model, content_image, style_image, input_image, normalize_
 
             print("Epoch = " + str(i) + "\t Style_loss = " + str(weighed_style_loss.item())
                   + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
+
+            # Update rq job progress over iterations
+            if job is not None:
+                job.meta['progress'] = i / num_steps
+                job.save_meta()
 
             # return computed total score value
 
