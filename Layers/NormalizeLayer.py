@@ -15,6 +15,7 @@ class NormalizeLayer(nn.Module):
         super(NormalizeLayer, self).__init__()
         # Reshape the mean and std to [C, 1, 1] to work with pytorch tensors of shape
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # device = torch.device("cpu")
         self.mean = torch.tensor(mean).reshape(-1, 1, 1).to(device)
         self.std = torch.tensor(std).reshape(-1, 1, 1).to(device)
 

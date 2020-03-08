@@ -20,6 +20,8 @@ from rq import get_current_job
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
+# device = torch.device("cpu")
+# imsize = (200, 200)
 default_model = models.vgg19(pretrained=True).features.to(device).eval()
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
@@ -218,6 +220,11 @@ def style_transfer_wrapper(style_filename, content_filename, output_filename):
                             mean, std, content_layers_req, style_layers_req)
 
     save_tensor(output_filename, result)
+
+    job = get_current_job()
+    if job is not None:
+        job.meta['progress'] = 1
+        job.save_meta()
 
 
 # 6. Write training function

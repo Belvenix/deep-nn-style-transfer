@@ -57,23 +57,33 @@ def run_transfer():
     job.meta['progress'] = 0
     job.save_meta()
 
-    return redirect(url_for('get_status'))
+    return redirect(url_for('status'))
 
 
+# TODO redirect if no session
 @app.route('/status')
-def get_status():
-    job = queue.fetch_job(session['job_id'])
+def status():
+    return render_template('status.html')
 
-    # TODO add progressbar and redirect after its done
+
+# TODO delete files and show result
+@app.route('/result')
+def result():
+    pass
+
+
+@app.route('/get_status')
+def get_status():
+    # TODO handle job exceptions
+    job = queue.fetch_job(session['job_id'])
     if job is None:
         abort(500)
-    progress = job.meta['progress']
 
+    progress = job.meta['progress']
     if progress is not None:
         return str(progress)
     else:
         abort(500)
-
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images
 # from uploaded content/style images
