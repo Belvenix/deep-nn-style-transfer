@@ -1,6 +1,7 @@
 {% extends 'page_template.html' %}
 
 {% block body %}
+<script src="{{ url_for('static', filename='scripts/get_status.js') }}"></script>
 <div>
     <span id="transfer_status">None</span>
 </div>

@@ -66,10 +66,19 @@ def status():
     return render_template('status.html')
 
 
-# TODO delete files and show result
+# TODO handle no session
 @app.route('/result')
-def result():
-    pass
+def get_result():
+    user_id = session['user_id']
+    return redirect(url_for("show_result", user_id=user_id))
+
+
+# TODO delete files and show result
+@app.route('/result/<user_id>')
+def show_result(user_id):
+    file_name = "results/" + user_id + "_out.jpg"
+    file_path = url_for('static', filename=file_name)
+    return render_template('result.html', result_path=file_path)
 
 
 @app.route('/get_status')

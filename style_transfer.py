@@ -23,7 +23,7 @@ imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 # device = torch.device("cpu")
 # imsize = (200, 200)
 default_model = models.vgg19(pretrained=True).features.to(device).eval()
-RESULTS_PATH = "images/results/"
+RESULTS_PATH = "server/static/results/"
 IMAGES_PATH = "images/"
 
 
@@ -217,7 +217,7 @@ def style_transfer_wrapper(style_filename, content_filename, output_filename):
     std = [0.229, 0.224, 0.225]
 
     result = style_transfer(default_model, content_tensor, style_tensor, input_tensor,
-                            mean, std, content_layers_req, style_layers_req)
+                            mean, std, content_layers_req, style_layers_req, num_steps=15)
 
     save_tensor(output_filename, result)
 
