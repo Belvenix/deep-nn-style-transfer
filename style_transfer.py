@@ -6,6 +6,7 @@ import torchvision.transforms as transforms
 import torch.nn as nn
 import torch.optim as optim
 
+import os
 import torch
 import pprint
 import copy
@@ -210,6 +211,8 @@ def style_transfer_wrapper(style_filename, content_filename, output_filename):
     style_tensor = image_loader(style_filename)
     content_tensor = image_loader(content_filename)
     input_tensor = content_tensor.clone()
+    os.remove(IMAGES_PATH + style_filename)
+    os.remove(IMAGES_PATH + content_filename)
 
     content_layers_req = ["Conv2d_10"]
     style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]

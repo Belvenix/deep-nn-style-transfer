@@ -40,8 +40,7 @@ def run_transfer():
 
     if style_image.mimetype not in ALLOWED_TYPES \
             or content_image.mimetype not in ALLOWED_TYPES:
-        abort(415)
-        # TODO handle wrong mimetype
+        return redirect(url_for("error", error_type="type"))
 
     uid = uuid4()
     session['user_id'] = uid
@@ -69,30 +68,47 @@ def status():
 # TODO handle no session
 @app.route('/result')
 def get_result():
-    user_id = session['user_id']
-    return redirect(url_for("show_result", user_id=user_id))
+    user_id = session.get('user_id')
+
+    if user_id is not None:
+        return redirect(url_for("show_result", user_id=user_id))
+    else:
+        redirect(url_for("error", error_type="session"))
 
 
-# TODO delete files and show result
 @app.route('/result/<user_id>')
 def show_result(user_id):
     file_name = "results/" + user_id + "_out.jpg"
     file_path = url_for('static', filename=file_name)
-    return render_template('result.html', result_path=file_path)
+
+    if os.path.isfile(file_path):
+        return render_template('result.html', result_path=file_path)
+    else:
+        return redirect(url_for("error", error_type="result"))
 
 
 @app.route('/get_status')
 def get_status():
-    # TODO handle job exceptions
-    job = queue.fetch_job(session['job_id'])
-    if job is None:
-        abort(500)
+    if session.get('job_id') is not None:
+        job = queue.fetch_job(session['job_id'])
+        if job is None:
+            return redirect(url_for("error", error_type="job"))
+    else:
+        return redirect(url_for("error", error_type="session"))
 
     progress = job.meta['progress']
     if progress is not None:
         return str(progress)
     else:
-        abort(500)
+        redirect(url_for("error", error_type="job"))
+
+
+# TODO handle different error types
+@app.route('/error/<error_type>')
+def error(error_type):
+    message = "Default error message"
+    return render_template('error.html', message=message)
+
 
 # 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images
 # from uploaded content/style images
