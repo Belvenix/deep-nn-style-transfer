@@ -1,7 +1,7 @@
 FROM ubuntu:focal
 
 # Install basic tools
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y wget curl tar nano gedit ssh git python3-pip openjdk-8-jdk supervisor
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y wget curl tar nano gedit ssh git python3-pip
 
 # Change the working directory
 WORKDIR /
