@@ -17,8 +17,8 @@ datagen = ImageDataGenerator(
 
 def rename_files():
     print("Renaming files")
-    directory_content_t = DNNConfigurer["data_files"]["CONTENT_TRANSFORMED_ROOT"]
-    directory_style_t = DNNConfigurer["data_files"]["STYLE_TRANSFORMED_ROOT"]
+    directory_content_t = DNNConfigurer["data_files"]["CONTENT_ROOT"]
+    directory_style_t = DNNConfigurer["data_files"]["STYLE_ROOT"]
     i = 1
     for filename in os.listdir(directory_content_t):
         filename = os.path.join(directory_content_t, filename)
