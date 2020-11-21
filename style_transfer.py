@@ -1,20 +1,16 @@
-import matplotlib.pyplot as plt
-from PIL import Image
-
-import torchvision.models as models
-import torchvision.transforms as transforms
-
-import torch.nn as nn
-import torch.optim as optim
-
-import numpy as np
-import torch
-import pprint
 import copy
+import pprint
 from collections import OrderedDict
 
-from Layers.NormalizeLayer import NormalizeLayer
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchvision.models as models
+import torchvision.transforms as transforms
+from PIL import Image
+
 from Layers.ContentLayer import ContentLayer
+from Layers.NormalizeLayer import NormalizeLayer
 from Layers.StyleLayer import StyleLayer
 
 # -- CONSTANTS --
@@ -332,8 +328,6 @@ if __name__ == '__main__':
 
     input_image = content_tensor_image.clone()
     result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
-                            mean, std, content_layers_req, style_layers_req)
-
+                            mean, std, content_layers_req, style_layers_req, num_steps=5)
+    save_tensor('deepnn/testresult.jpg', result)
     # Show results
-
-    show_tensor(result)

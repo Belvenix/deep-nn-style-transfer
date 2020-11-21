@@ -34,3 +34,5 @@ To check your containers use the following command (or gui):
 ```
 docker ps -al
 ```
+
+Copyright disclaimer: We do NOT own style images featured in this repository. All rights belong to it's rightful owner/owner's. No copyright infringement intended. 
