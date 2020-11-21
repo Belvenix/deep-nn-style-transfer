@@ -18,6 +18,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 RESULTS_PATH = "images/results/"
 IMAGES_PATH = "images/"
+CONTENT = "content/"
+STYLE = "style/"
 
 
 # -- UTILITY FUNCTIONS --
@@ -29,9 +31,9 @@ def resize(pil_image):
     return resized_image
 
 
-def image_loader(file_name):
+def image_loader(img_type, file_name):
     """Loads the images from disk as preprocessed tensors"""
-    image = Image.open(IMAGES_PATH + file_name)
+    image = Image.open(IMAGES_PATH + img_type + file_name)
     resized_image = resize(image)
     tensor = (transforms.ToTensor()(resized_image)).to(device)
     return tensor
@@ -200,7 +202,7 @@ def get_optimizer(input_img):
 
 # 6. Write training function
 def style_transfer(nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                   content_layers_req, style_layers_req, num_steps=15, style_weight=100000, content_weight=1):
+                   content_layers_req, style_layers_req, num_steps=1, style_weight=100000, content_weight=1):
     """Runs the style transfer on input image"""
     # Get the rebuilded model and style and content layers
 
@@ -312,8 +314,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader("content_sample_1.jpg")
-    style_tensor_image = image_loader("style_sample_1.jpg")
+    content_tensor_image = image_loader(CONTENT, "IMG_5571.jpg")
+    style_tensor_image = image_loader(STYLE, "styles5.jpg")
 
     # Assert that they're same size
 
@@ -329,5 +331,8 @@ if __name__ == '__main__':
     input_image = content_tensor_image.clone()
     result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req, num_steps=5)
-    save_tensor('deepnn/testresult.jpg', result)
+    save_tensor('testresults.jpg', result)
     # Show results
+
+    show_tensor(result)
+    #save_tensor('drewnoResult1.jpg', result)
