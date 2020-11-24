@@ -314,8 +314,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader(CONTENT, "IMG_5571.jpg")
-    style_tensor_image = image_loader(STYLE, "styles5.jpg")
+    content_tensor_image = image_loader(CONTENT, "content_21.jpg")
+    style_tensor_image = image_loader(STYLE, "style_12.jpg")
 
     # Assert that they're same size
 
@@ -329,10 +329,14 @@ if __name__ == '__main__':
     # Run style transfer
 
     input_image = content_tensor_image.clone()
+    import time
+
+    start = time.time()
     result = style_transfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req, num_steps=5)
-    save_tensor('testresults.jpg', result)
+    save_tensor('testresults2.jpg', result)
     # Show results
+    processing_time = time.time() - start
+    print('It took: ' + str(round(processing_time, 2)) + 'seconds to process image')
 
     show_tensor(result)
-    #save_tensor('drewnoResult1.jpg', result)
