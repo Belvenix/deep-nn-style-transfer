@@ -1,7 +1,12 @@
-FROM ubuntu:focal
+FROM nvidia/cuda:9.0-devel
 
 # Install basic tools
 RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y wget curl tar nano gedit ssh git python3-pip
+
+RUN apt-get install software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt-get install python3.6
 
 # Change the working directory
 WORKDIR /repo
