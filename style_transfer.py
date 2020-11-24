@@ -1,13 +1,12 @@
 import copy
 import pprint
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
 import torchvision.transforms as transforms
 from PIL import Image
+from collections import OrderedDict
 
 from Layers.ContentLayer import ContentLayer
 from Layers.NormalizeLayer import NormalizeLayer
@@ -314,8 +313,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader(CONTENT, "IMG_5571.jpg")
-    style_tensor_image = image_loader(STYLE, "styles5.jpg")
+    content_tensor_image = image_loader(CONTENT, "content_1.jpg")
+    style_tensor_image = image_loader(STYLE, "style_1.jpg")
 
     # Assert that they're same size
 

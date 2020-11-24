@@ -1,10 +1,9 @@
-from StyleTransfer.style_transfer_class import StyleTransfer
-from StyleTransfer.utility_functions import resize, image_loader, to_image, show_tensor, save_tensor
-
 import pprint
-
 import torch
 import torchvision.models as models
+
+from StyleTransfer.style_transfer_class import StyleTransfer
+from StyleTransfer.utility_functions import image_loader, show_tensor, save_tensor
 
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,8 +37,8 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader(CONTENT, "IMG_5571.jpg")
-    style_tensor_image = image_loader(STYLE, "styles5.jpg")
+    content_tensor_image = image_loader(CONTENT, "content_1.jpg")
+    style_tensor_image = image_loader(STYLE, "style_1.jpg")
 
     # Assert that they're same size
 
@@ -57,7 +56,7 @@ if __name__ == '__main__':
     style_transfer_module = StyleTransfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req)
 
-    result = style_transfer_module.train_model(num_of_steps = 5)
+    result = style_transfer_module.train_model(num_steps=5)
 
     save_tensor('testresults.jpg', result)
     # Show results

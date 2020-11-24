@@ -1,10 +1,8 @@
 import copy
-from collections import OrderedDict
-
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
+from collections import OrderedDict
 
 from Layers.ContentLayer import ContentLayer
 from Layers.NormalizeLayer import NormalizeLayer
@@ -16,15 +14,15 @@ imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 
 class StyleTransfer:
     def __init__(self, nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                           content_layers_req, style_layers_req,num, style_weight=100000, content_weight=1):
+                 content_layers_req, style_layers_req, style_weight=100000, content_weight=1):
 
         """Runs the style transfer on input image"""
         # Get the rebuilded model and style and content layers
 
         new_model, style_layers, content_layers = self.rebuild_model(nn_model, content_image.unsqueeze(0),
-                                                                style_image.unsqueeze(0), normalize_mean,
-                                                                normalize_std,
-                                                                content_layers_req, style_layers_req)
+                                                                     style_image.unsqueeze(0), normalize_mean,
+                                                                     normalize_std,
+                                                                     content_layers_req, style_layers_req)
         self._input_image = input_image
         self.model = new_model
         self.style_layers = style_layers
@@ -162,53 +160,6 @@ class StyleTransfer:
 
     # train model
 
-    # DEFINE THE CLOSURE FUNCTIONS START
-    def closure(self, style_weight, content_weight, iteration):
-        # Inside closure function
-        # correct the values of updated input image to range from 0 to 1 with clamp_()
-        with torch.no_grad():
-            self._input_batch.clamp_(0, 1)
-
-        # Zero the gradients from last iteration and
-        # forward the image through network
-
-        self._optimizer.zero_grad()
-        self.model(self._input_batch)
-
-        # Compute the style and content stores
-        # based on values computed in style/content layers during forward propagation
-
-        style_loss = 0
-        for layer in self.style_layers:
-            style_loss = style_loss + layer.loss
-
-        content_loss = 0
-        for layer in self.content_layers:
-            content_loss = content_loss + layer.loss
-
-        # We need to multiply the scores by weights
-        # as described in the paper https://arxiv.org/pdf/1508.06576.pdf,
-        # formula nr. 7
-
-        weighed_style_loss = self._style_layer_weight * style_weight * style_loss
-        weighed_content_loss = content_weight * content_loss
-
-        # Compute total loss and propagate it backwards
-
-        loss = weighed_style_loss + weighed_content_loss
-        loss.backward()
-
-        # Print training info every X epochs
-
-        print("Epoch = " + str(iteration) + "\t Style_loss = " + str(weighed_style_loss.item())
-              + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
-
-        # return computed total score value
-
-        return loss
-
-    # Run the optimizer for num_steps
-
     # To work with optimizer like LBFGS  you need to use something called "closure"
     # http://sagecal.sourceforge.net/pytorch/index.html <- info here
 
@@ -219,12 +170,54 @@ class StyleTransfer:
 
     # LOOP START
     def train_model(self, num_steps=1, style_weight=100000, content_weight=1):
-        for i in range(num_steps):
-            # DEFINE THE CLOSURE FUNCTIONS START
-            loss =  self.closure(style_weight, content_weight, i)
-            # Optimizer step
+        # DEFINE THE CLOSURE FUNCTIONS START
+        def closure():
+            # Inside closure function
+            # correct the values of updated input image to range from 0 to 1 with clamp_()
+            with torch.no_grad():
+                self._input_batch.clamp_(0, 1)
 
-            self._optimizer.step(loss)
+            # Zero the gradients from last iteration and
+            # forward the image through network
+
+            self._optimizer.zero_grad()
+            self.model(self._input_batch)
+
+            # Compute the style and content stores
+            # based on values computed in style/content layers during forward propagation
+
+            style_loss = 0
+            for layer in self.style_layers:
+                style_loss = style_loss + layer.loss
+
+            content_loss = 0
+            for layer in self.content_layers:
+                content_loss = content_loss + layer.loss
+
+            # We need to multiply the scores by weights
+            # as described in the paper https://arxiv.org/pdf/1508.06576.pdf,
+            # formula nr. 7
+
+            weighed_style_loss = self._style_layer_weight * self._style_weight * style_loss
+            weighed_content_loss = self._content_weight * content_loss
+
+            # Compute total loss and propagate it backwards
+
+            loss = weighed_style_loss + weighed_content_loss
+            loss.backward()
+
+            # Print training info every X epochs
+
+            print("Epoch = " + str(i) + "\t Style_loss = " + str(weighed_style_loss.item())
+                  + "\t Content_loss = " + str(weighed_content_loss.item()) + "\t Loss = " + str(loss.item()))
+
+            # return computed total score value
+
+            return loss
+
+        for i in range(num_steps):
+            # Optimizer step
+            self._optimizer.step(closure)
 
         # LOOP END
 
