@@ -1,8 +1,9 @@
 import copy
+from collections import OrderedDict
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from collections import OrderedDict
 
 from Layers.ContentLayer import ContentLayer
 from Layers.NormalizeLayer import NormalizeLayer
@@ -11,6 +12,7 @@ from Layers.StyleLayer import StyleLayer
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
+
 
 class StyleTransfer:
     def __init__(self, nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
