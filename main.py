@@ -1,3 +1,4 @@
+import argparse
 import os
 import pprint
 import time
@@ -10,6 +11,10 @@ from StyleTransfer.utility_functions import image_loader, save_tensor
 # -- CONSTANTS --
 from utils import DNNConfigurer
 
+p = argparse.ArgumentParser()
+p.add_argument('--coff', default=0)
+p.add_argument('--soff', default=0)
+
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 RESULTS_PATH = "images/results/"
@@ -19,6 +24,9 @@ STYLE = "style/"
 
 if __name__ == '__main__':
     times = []
+    args = vars(p.parse_args())
+    coff = int(args['coff'])
+    soff = int(args['soff'])
     try:
         # Pretty printer used for nice display of architecture
         pp = pprint.PrettyPrinter(indent=4)
@@ -28,8 +36,8 @@ if __name__ == '__main__':
         # to train the network
         model_vgg19 = models.vgg19(pretrained=True).features.to(device).eval()
         model_vgg16 = models.vgg16(pretrained=True).features.to(device).eval()
-        pprint.pprint(model_vgg19)
-        pprint.pprint(model_vgg16)
+        # pprint.pprint(model_vgg19)
+        # pprint.pprint(model_vgg16)
 
         # Define after which layers we want to input our content/style layers
         # they will enable us to compute the style and content losses during forward propagation
@@ -55,9 +63,18 @@ if __name__ == '__main__':
         # Main loop going over all images
         directory_content_t = DNNConfigurer["data_files"]["CONTENT_ROOT"]
         directory_style_t = DNNConfigurer["data_files"]["STYLE_ROOT"]
-
+        i, j = -1, -1
         for filename_c in os.listdir(directory_content_t):
+            # offset for content
+            i += 1
+            if i < coff:
+                continue
+
             for filename_s in os.listdir(directory_style_t):
+                # offset for style
+                j += 1
+                if j < soff:
+                    continue
                 # Load the images as preprocessed tensors
 
                 content_tensor_image = image_loader(CONTENT, filename_c)
@@ -73,6 +90,7 @@ if __name__ == '__main__':
                                                       input_image,
                                                       mean, std, content_layers_req, style_layers_req)
                 start = time.time()
+                print('Started learning for style image: ' + str(filename_s) + ' and content image: ' + str(filename_c))
                 result = style_transfer_module.train_model(num_steps=15)
                 duration = time.time() - start
                 times.append(duration)
