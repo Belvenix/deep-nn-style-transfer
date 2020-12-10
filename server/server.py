@@ -79,7 +79,7 @@ def run_style_transfer():
 def fail_page(reason):
     return render_template("upload_fail.html", reason = reason)
 
-# 3. Write a function that uses style_transfer() function from style_transfer.py to generate new images from uploaded content/style images
+# 3. Write a function that uses StyleTransfer() function from StyleTransfer.py to generate new images from uploaded content/style images
 # 3.1 Write a simple front that shows progress or gives the user information that the image is being generated
 # 4. Present the result for user in simple front, maybe add download button so user can download the new image
 
