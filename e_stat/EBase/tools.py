@@ -100,14 +100,14 @@ class Cov_Mean(nn.Module):
     
 # Our class of tools for generate base E statistics   
 class TOOLS:   
-    def __init__(self,model_dir,img_size,):
+    def __init__(self,model,img_size,):
         
         #set parameters
         self.img_size = img_size
         self.PCA_basis = 0
         # Layers for style transfer
-        self.style_layers = ['r11','r21','r31','r41', 'r51'] 
-        self.content_layers = ['r42']  
+        self.style_layers = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"] #todo
+        self.content_layers = ["Conv2d_10"]  #todo
         # Reduced Dimensions(ranks) for PCA
         self.Ks = [ 32,48,128,256,256]
         # pre  processing for images
@@ -121,8 +121,9 @@ class TOOLS:
         
         
         #get network
-        self.vgg = VGG()
-        self.vgg.load_state_dict(torch.load(model_dir + 'vgg_conv.pth'))
+        #self.vgg = VGG()
+        #self.vgg.load_state_dict(torch.load(model_dir + 'vgg_conv.pth'))
+        self.vgg = model
         for param in self.vgg.parameters():
             param.requires_grad = False
         if torch.cuda.is_available():
@@ -145,13 +146,13 @@ class TOOLS:
         return u
     
     # given folder of reference images, generate a basis from svd decomposition of (averaged) covariance matrix of each layer 
-    def PCA_Basis_Generater(self,Reference_dir):
+    def PCA_Basis_Generater(self,Reference_dir, style_layers):
         
         references=[]
         references = glob.glob(Reference_dir+"*.jpg")  # generate a list of reference images                    
                     
         Total_Covs=[0,0,0,0,0] # initialize a list of covariant matrices 5 layers 
-
+        print(len(references))
         for sample in references:    
 
             img_torch = self.prep(Image.open(sample)) 
@@ -160,10 +161,17 @@ class TOOLS:
                 img_torch = Variable(img_torch.unsqueeze(0).cuda()) 
             else:
                 img_torch = Variable(img_torch.unsqueeze(0))
-                
-            Covs_Means = [Cov_Mean()(A) for A in self.vgg(img_torch, self.style_layers[:])] # generate corvariant matrix and means for each layer
-            Total_Covs= [x+y[0] for x,y in zip(Total_Covs,Covs_Means)] # summation of corvariant matrix of each layer over references
 
+            Covs_Means =[]
+
+            #Covs_Means = [Cov_Mean()(A) for A in self.vgg(img_torch, self.style_layers[:])] # generate corvariant matrix and means for each layer
+            for A in style_layers:
+                print(A)
+                Covs_Means.append(Cov_Mean()(A.target_activations))
+
+
+            Total_Covs= [x+y[0] for x,y in zip(Total_Covs,Covs_Means)] # summation of corvariant matrix of each layer over references
+            #print(Total_Covs)
         # Take an average over references
         AVG_Covs = [x/len(references) for x in Total_Covs]
 
@@ -178,7 +186,7 @@ class TOOLS:
     
     # generate Base E statistics of each sample image (source_dir, source_list) according to style images(style_dir) 
     # The formula is based on Multivariate normal distributions of https://en.wikipedia.org/wiki/Kullback–Leibler_divergence
-    def E_Basic_Statistics(self, style_dir, source_dir, source_list, outputfile):
+    def E_Basic_Statistics(self, style_dir, source_dir, source_list, outputfile, style_layers, model_nn, model_style, content_image, final_style_img,result_img, normalize_mean,normalize_std,content_layers_req,style_layers_req):
         # Reduced Dimensions(ranks) for PCA
         Ks = self.Ks # [ 32,48,128,256,256]  
         
@@ -194,14 +202,14 @@ class TOOLS:
             
             ## with specific image file name on list (depending on filenames of source_list)
             filename  = line[:-1] 
-            sp =line[:].split('_')
+            sp =line[:].split('@')
             style =int(sp[0][5:]) 
             content = int(sp[1][7:])
             print(style,content, filename)
 
             # pre-processing of images with typorch
             img_dirs = [style_dir,  source_dir]
-            img_names = ['styles - %s.jpg'%style, filename]
+            img_names = ['/style%s.jpg'%style, filename]
             imgs = [Image.open(img_dirs[i] + name) for i,name in enumerate(img_names)]
             
             imgs_torch = [self.prep(img) for img in imgs]
@@ -213,8 +221,30 @@ class TOOLS:
 
             
             # generate convariant matrix and mean of layers of style image(target) and synthemsized image
-            style_targets = [Cov_Mean()(A) for A in self.vgg(style_image, self.style_layers[:])]
-            syn_results = [Cov_Mean()(A) for A in self.vgg(syn_image, self.style_layers[:])]
+            #style_targets = [Cov_Mean()(A) for A in self.vgg(style_image, self.style_layers[:])]
+            style_targets = []
+
+            new_model, style_layers, content_layers = model_style.rebuild_model(model_nn, content_image.unsqueeze(0),
+                                                                     final_style_img.unsqueeze(0), normalize_mean,
+                                                                     normalize_std,
+                                                                     content_layers_req, style_layers_req)
+
+            # Covs_Means = [Cov_Mean()(A) for A in self.vgg(img_torch, self.style_layers[:])] # generate corvariant matrix and means for each layer
+            for A in style_layers:
+                print(A)
+                style_targets.append(Cov_Mean()(A.target_activations))
+
+            #syn_results = [Cov_Mean()(A) for A in self.vgg(syn_image, self.style_layers[:])]
+            syn_results = []
+            print(len(syn_image))
+            new_model, style_layers, content_layers = model_style.rebuild_model(model_nn, content_image.unsqueeze(0),
+                                                                          result_img.unsqueeze(0), normalize_mean, #syn_image
+                                                                          normalize_std,
+                                                                          content_layers_req, style_layers_req)
+
+            for A in style_layers:
+                print(A)
+                syn_results.append(Cov_Mean()(A.target_activations))
 
             # pre-process of terms for the evaluation KL divergence:
             # generate new pca covariance matrix and mean for style image and synthesized image with given PCA_basis and reduced ranks.
@@ -225,7 +255,7 @@ class TOOLS:
 
             KLs = []
             # A list of terms needed for KL divergence
-            KL_parts  = [ (torch.trace(torch.mm( y[0].inverse(), x[0])), torch.mm( torch.mm((y[1] -x[1]),  y[0].inverse()), (y[1]-x[1]).t() ).squeeze()[0] ,-k, logD) for x,y,logD, k in zip(PCA_syn_results,PCA_targets,LogDet_AoverB,Ks)]
+            KL_parts  = [ (torch.trace(torch.mm( y[0].inverse(), x[0])), torch.mm( torch.mm((y[1] -x[1]),  y[0].inverse()), (y[1]-x[1]).t() ).squeeze() ,-k, logD) for x,y,logD, k in zip(PCA_syn_results,PCA_targets,LogDet_AoverB,Ks)]
 
             KLs.append(np.sum(x) for x in KL_parts )  # np.sum(x) gives the 2*KL divergence of each layer
             Es = [ str(-np.log(x)+ np.log(2)) for x in KLs[0]] # E value of each layer is -log(KL)

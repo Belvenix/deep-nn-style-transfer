@@ -4,6 +4,8 @@ import torchvision.models as models
 
 from StyleTransfer.style_transfer_class import StyleTransfer
 from StyleTransfer.utility_functions import image_loader, show_tensor, save_tensor
+from e_stat.EBase.tools import TOOLS
+
 
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -38,7 +40,7 @@ if __name__ == '__main__':
     # Load the images as preprocessed tensors
 
     content_tensor_image = image_loader(CONTENT, "content_1.jpg")
-    style_tensor_image = image_loader(STYLE, "style_1.jpg")
+    style_tensor_image = image_loader(STYLE, "style93.jpg")
 
     # Assert that they're same size
 
@@ -56,11 +58,26 @@ if __name__ == '__main__':
     style_transfer_module = StyleTransfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req)
 
+    result = style_transfer_module.train_model(num_steps=1)
+    print("działa")
+    style_transfer_model = style_transfer_module.model
+    print("działa")
+    E_StatisticsTools = TOOLS(style_transfer_model, 512)
 
-    result = style_transfer_module.train_model(num_steps=5)
+    PCA_basis = E_StatisticsTools.PCA_Basis_Generater('./test/', style_transfer_module.style_layers)
 
-    save_tensor('testresults.jpg', result)
+    # Once the PCA_basis is generated, we need the following information to generate Base E statisics:
+    style_dir = './images/style'  # the style target images
+    source_dir = './test_sample/'  # sample images(synthesized images we want to quantify)
+    source_list = 'sample.txt'  # lsit of sample images
+    outputfile = 'E_Base.txt'  # the name of output file
+
+    # This will generate a text file with each row represneting the information of one sample image with
+    # 5 Base E statistics corresponding to 5 critical layers in VGG
+    E_StatisticsTools.E_Basic_Statistics(style_dir, source_dir, source_list, outputfile, style_transfer_module.style_layers, model,style_transfer_module , content_tensor_image,style_tensor_image,result, mean, std, content_layers_req, style_layers_req)
+
+    #save_tensor('testresults.jpg', result)
     # Show results
 
-    show_tensor(result)
+    #show_tensor(result)
     # save_tensor('drewnoResult1.jpg', result)
