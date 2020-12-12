@@ -26,7 +26,7 @@ class StyleTransfer:
                                                                      normalize_std,
                                                                      content_layers_req, style_layers_req)
         self._input_image = input_image
-        self.model = new_model
+        self.nn_model = new_model
         self.style_layers = style_layers
         self.content_layers = content_layers
         self._style_layer_weight = 1 / len(style_layers)

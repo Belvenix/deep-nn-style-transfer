@@ -10,14 +10,17 @@ from e_stat.EBase.tools import TOOLS
 # -- CONSTANTS --
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
+imsize_one_dim = 512 if torch.cuda.is_available() else 300
 RESULTS_PATH = "images/results/"
-IMAGES_PATH = "images/"
+IMAGES_PATH = "evaluate_files/"
 CONTENT = "content/"
 STYLE = "style/"
+RESULT = "result/"
 
+content_file = "content1.jpg"
+style_file = "style93.jpg"
+result_file = "style93@content1@cos.jpg"
 
-def count_e_statistics(module_nn, model, content_img, style_img, result_img):
-    pass
 
 
 if __name__ == '__main__':
@@ -43,17 +46,14 @@ if __name__ == '__main__':
 
     # Load the images as preprocessed tensors
 
-    content_tensor_image = image_loader(CONTENT, "content_1.jpg")
-    style_tensor_image = image_loader(STYLE, "style93.jpg")
+    content_tensor_image = image_loader(CONTENT, content_file, IMAGES_PATH)
+    style_tensor_image = image_loader(STYLE, style_file, IMAGES_PATH)
+    result_tensor_image = image_loader(RESULT, result_file, IMAGES_PATH)
 
     # Assert that they're same size
 
     assert content_tensor_image.size() == style_tensor_image.size(), 'Images are not the same size!'
-
-    # Display them
-
-    show_tensor(content_tensor_image)
-    show_tensor(style_tensor_image)
+    assert result_tensor_image.size() == style_tensor_image.size(), 'Images are not the same size!'
 
     # Run style transfer
 
@@ -62,26 +62,22 @@ if __name__ == '__main__':
     style_transfer_module = StyleTransfer(model, content_tensor_image, style_tensor_image, input_image,
                             mean, std, content_layers_req, style_layers_req)
 
-    result = style_transfer_module.train_model(num_steps=1)
-    print("działa")
-    style_transfer_model = style_transfer_module.nn_model
-    print("działa")
-    E_StatisticsTools = TOOLS(style_transfer_model, 300)
+    style_transfer_nn_model = style_transfer_module.nn_model
 
-    PCA_basis = E_StatisticsTools.PCA_Basis_Generater('./test/', style_transfer_module.style_layers)
+    E_StatisticsTools = TOOLS(style_transfer_nn_model, imsize_one_dim)
+
+    PCA_basis = E_StatisticsTools.my_PCA_Basis_Generater(style_tensor_image, style_transfer_module.style_layers)
 
     # Once the PCA_basis is generated, we need the following information to generate Base E statisics:
     style_dir = './images/style'  # the style target images
     source_dir = './test_sample/'  # sample images(synthesized images we want to quantify)
     source_list = 'sample.txt'  # lsit of sample images
-    outputfile = 'E_Base.txt'  # the name of output file
-
+    outputfile = 'E_BaseTEST.txt'  # the name of output file
+    iteration = 0
     # This will generate a text file with each row represneting the information of one sample image with
     # 5 Base E statistics corresponding to 5 critical layers in VGG
-    E_StatisticsTools.E_Basic_Statistics(style_dir, source_dir, source_list, outputfile, style_transfer_module.style_layers, model,style_transfer_module , content_tensor_image,style_tensor_image,result, mean, std, content_layers_req, style_layers_req)
+    E_StatisticsTools.my_E_Basic_Statistics(source_list, outputfile,
+                                          model, style_transfer_module,
+                                         content_tensor_image, style_tensor_image, result_tensor_image, mean, std,
+                                         content_layers_req, style_layers_req, iteration)
 
-    #save_tensor('testresults.jpg', result)
-    # Show results
-
-    #show_tensor(result)
-    save_tensor('drewnoResulttest.jpg', result)

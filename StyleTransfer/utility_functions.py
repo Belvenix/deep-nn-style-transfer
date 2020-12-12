@@ -19,7 +19,7 @@ def resize(pil_image):
     return resized_image
 
 
-def image_loader(img_type, file_name):
+def image_loader(img_type, file_name, IMAGES_PATH="images/"):
     """Loads the images from disk as preprocessed tensors"""
     image = Image.open(IMAGES_PATH + img_type + file_name)
     resized_image = resize(image)
