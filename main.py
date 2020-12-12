@@ -37,12 +37,12 @@ if __name__ == '__main__':
         model_vgg19 = models.vgg19(pretrained=True).features.to(device).eval()
         model_vgg16 = models.vgg16(pretrained=True).features.to(device).eval()
         # pprint.pprint(model_vgg19)
-        # pprint.pprint(model_vgg16)
+        pprint.pprint(model_vgg16)
 
         # Define after which layers we want to input our content/style layers
         # they will enable us to compute the style and content losses during forward propagation
-        content_layers_req = ["Conv2d_10"]  # pick layer near the end
-        style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_11"]  # pick layers after pooling
+        content_layers_req = ["Conv2d_11"]  # pick layer near the end
+        style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_7", "Conv2d_9"]  # pick layers after pooling
 
         # VGG19 specific mean and std used to normalize images during it's training
         # We will normalize our images using those same values to ensure best results
@@ -63,6 +63,7 @@ if __name__ == '__main__':
         # Main loop going over all images
         directory_content_t = DNNConfigurer["data_files"]["CONTENT_ROOT"]
         directory_style_t = DNNConfigurer["data_files"]["STYLE_ROOT"]
+        iter2, iter = 2, 0
         i, j = -1, -1
         for filename_c in os.listdir(directory_content_t):
             # offset for content
@@ -72,9 +73,12 @@ if __name__ == '__main__':
 
             for filename_s in os.listdir(directory_style_t):
                 # offset for style
+                iter += 1
                 j += 1
                 if j < soff:
                     continue
+                if iter > iter2:
+                    raise KeyboardInterrupt
                 # Load the images as preprocessed tensors
 
                 content_tensor_image = image_loader(CONTENT, filename_c)
@@ -94,7 +98,7 @@ if __name__ == '__main__':
                 result = style_transfer_module.train_model(num_steps=15)
                 duration = time.time() - start
                 times.append(duration)
-                save_tensor(filename_c + '___' + filename_s, result)
+                save_tensor(filename_c + '___' + filename_s + '___seventh.jpg', result)
 
     finally:
         print(times)
