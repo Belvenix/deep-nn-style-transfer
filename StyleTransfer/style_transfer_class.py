@@ -16,7 +16,7 @@ imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 
 class StyleTransfer:
     def __init__(self, nn_model, content_image, style_image, input_image, normalize_mean, normalize_std,
-                 content_layers_req, style_layers_req, style_weight=100000, content_weight=1):
+                 content_layers_req, style_layers_req, style_weight=0.1, content_weight=1):
 
         """Runs the style transfer on input image"""
         # Get the rebuilded model and style and content layers

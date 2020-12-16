@@ -103,7 +103,7 @@ class TOOLS:
         self.img_size = img_size
         self.PCA_basis = 0
         # Layers for style transfer
-        self.style_layers = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]
+        self.style_layers = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_11"]  # pick layers after pooling
         self.content_layers = ["Conv2d_10"]
         # Reduced Dimensions(ranks) for PCA
         self.Ks = [32, 48, 128, 256, 256]
@@ -292,9 +292,9 @@ class TOOLS:
         # setup for input and outpu files
         input_list = open(source_list, 'r')
         output_list = open('%s%s' % (Ks, outputfile), 'a+')
-        columns = ["style", "content", "weight", "E1", "E2", "E3", "E4", "E5", "\n"]
-        name = '\t'.join(columns)
-        output_list.write(name)
+        #columns = ["style", "content", "weight", "E1", "E2", "E3", "E4", "E5", "\n"]
+        #name = '\t'.join(columns)
+        #output_list.write(name)
 
         for index, line in enumerate(input_list.readlines()[:]):
             if index == iteration:
@@ -344,7 +344,7 @@ class TOOLS:
                             x, y, logD, k in zip(PCA_syn_results, PCA_targets, LogDet_AoverB, Ks)]
 
                 KLs.append(np.sum(x) for x in KL_parts)  # np.sum(x) gives the 2*KL divergence of each layer
-                Es = [str(-np.log(x) + np.log(2)) for x in KLs[0]]  # E value of each layer is -log(KL)
+                Es = [str(-np.log(abs(x)) + np.log(2)) for x in KLs[0]]  # E value of each layer is -log(KL)
 
                 # write the reuslts to output file
                 new = sp[:3] + Es + ["\n"]

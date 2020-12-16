@@ -12,14 +12,14 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 imsize = (512, 512) if torch.cuda.is_available() else (300, 300)
 imsize_one_dim = 512 if torch.cuda.is_available() else 300
 RESULTS_PATH = "images/results/"
-IMAGES_PATH = "evaluate_files/"
+IMAGES_PATH = "images/"
 CONTENT = "content/"
 STYLE = "style/"
-RESULT = "result/"
+RESULT = "results/"
 
-content_file = "content1.jpg"
-style_file = "style93.jpg"
-result_file = "style93@content1@cos.jpg"
+content_file = "content_1.jpg"
+style_file = "style_14.jpg"
+result_file = "content_1.jpg___style_14.jpg___seventh.jpg"
 
 
 
@@ -30,13 +30,13 @@ if __name__ == '__main__':
     # we dont need the last fully connected layers and adaptive avgpool so we copy only CNN part of VGG19
     # We send it to GPU and set it to run in eval() mode as in Style Transfer we won't need
     # to train the network
-    model = models.vgg19(pretrained=True).features.to(device).eval()
-    pprint.pprint(model)
+    model = models.vgg16(pretrained=True).features.to(device).eval()
+    #pprint.pprint(model)
 
     # Define after which layers we want to input our content/style layers
     # they will enable us to compute the style and content losses during forward propagation
     content_layers_req = ["Conv2d_10"]  # pick layer near the end
-    style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_13"]  # pick layers after pooling
+    style_layers_req = ["Conv2d_1", "Conv2d_3", "Conv2d_5", "Conv2d_9", "Conv2d_11"]  # pick layers after pooling
 
     # VGG19 specific mean and std used to normalize images during it's training
     # We will normalize our images using those same values to ensure best results
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     style_dir = './images/style'  # the style target images
     source_dir = './test_sample/'  # sample images(synthesized images we want to quantify)
     source_list = 'sample.txt'  # lsit of sample images
-    outputfile = 'E_BaseTEST.txt'  # the name of output file
+    outputfile = 'E_Base_test.txt'  # the name of output file
     iteration = 0
     # This will generate a text file with each row represneting the information of one sample image with
     # 5 Base E statistics corresponding to 5 critical layers in VGG
